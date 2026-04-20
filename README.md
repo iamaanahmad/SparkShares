@@ -1,36 +1,87 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# ⚡ SparkShares
 
-## Getting Started
+> **Tokenized Micro‑Grant Marketplace for Creators.** Built for the [Bags Hackathon](https://bags.fm/).
 
-First, run the development server:
+A lightweight marketplace on the Bags platform where creators post **micro‑grant bounties** (small tasks, ideas, or mini‑projects) funded by community wallets and brands. Backers buy project tokens (SparkShares) to automatically distribute micro‑grants to contributors. Creators keep royalties, and contributors earn quickly. **This turns passive token launches into active community funding engines.**
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+---
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## 🚀 Live Demo & Links
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+- **Live Site:** [Insert Vercel/Netlify Link Here]
+- **Demo Video:** [Insert YouTube/Loom Link Here]
+- **Hackathon Track:** [Insert Track Name Here]
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+---
 
-## Learn More
+## 💡 Why SparkShares?
 
-To learn more about Next.js, take a look at the following resources:
+- **High Product‑Market Fit:** Creators want funding + discoverability; backers want friction-free ways to support their favorite builders while earning rewards.
+- **Direct Bags Integration:** Leverages the Bags SDK directly for project token launches, fee sharing (royalties), and founder/admin roles.
+- **Micro-Grant Model:** Automates the tedious elements of bounty distribution—enabling low-cost, decentralized community incentives.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+---
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## 🛠️ Features
 
-## Deploy on Vercel
+1. **Launch a Project (Bags SDK)**: Instantly deploy project tokens and configure fee-sharing.
+2. **Micro-Grant Bounties**: Creators can mint tasks with small SOL or token rewards directly tied to their active Bags token.
+3. **Submit Work**: Contributors browse out-standing micro-grants and submit their proofs of work (links, PRs, etc.).
+4. **Approve & Distribute**: Creators review submissions safely on a slick interface and seamlessly trigger the contract to distribute the token/SOL micro-grants.
+5. **Analytics Board**: Track how much work the community is generating, funds distributed, and royalty splits.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+---
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## ⚙️ Tech Stack
+
+- **Frontend:** Next.js 14, React, Tailwind CSS, Shadcn UI
+- **Database / Backend:** Supabase (PostgreSQL)
+- **Web3 Ecosystem:** Solana Web3.js, Wallet Adapter (Phantom, Solflare)
+- **Host Platform:** Bags SDK + Platform APIs
+
+---
+
+## 💻 Running Locally
+
+### Prerequisites
+- Node.js >= 18
+- A Supabase Project
+- A Solana Wallet (Phantom) set to Devnet
+- Devnet SOL (for mocked Bags SDK transactions)
+
+### Quick Start
+
+1. **Clone the repository:**
+   ```bash
+   git clone https://github.com/iamaanahmad/SparkShares.git
+   cd SparkShares
+   ```
+
+2. **Install dependencies:**
+   ```bash
+   npm install
+   ```
+
+3. **Set up Environment Variables:**
+   Create a `.env.local` file at the root:
+   ```env
+   NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
+   NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+   ```
+
+4. **Run the development server:**
+   ```bash
+   npm run dev
+   ```
+
+5. Open [http://localhost:3000](http://localhost:3000) with your browser to explore.
+
+---
+
+## 🏆 Hackathon Notes (For Judges)
+- **Bags Launch Fallback:** The Bags SDK Metaora integration currently requires Mainnet API keys for full fluid curves. For the sake of this Devnet prototype, the project launch routes default to a `MockTokenMintAddress_Devnet` safe fallback to demonstrate the UI/UX end-to-end without spending real Mainnet SOL.
+- **Database Schema:** We heavily utilized relational Postgres mapping on Supabase (e.g., mapping `grant_id` and `content` from contributors back to exactly which creator bounties hold status allocations).
+
+---
+
+*This project was rapidly prototyped during the corresponding hackathon timeframe. PRs, suggestions, and feedback are highly welcomed!*
