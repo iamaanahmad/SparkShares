@@ -50,11 +50,11 @@ export function CreateBountyModal({ projectId, projectName }: { projectId: strin
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
+      <DialogTrigger render={
         <Button className="w-full bg-zinc-800 hover:bg-zinc-700 text-sm font-medium" variant="secondary">
           <Plus size={16} className="mr-2" /> Add Bounty
         </Button>
-      </DialogTrigger>
+      } />
       <DialogContent className="sm:max-w-[425px] bg-zinc-950 border-zinc-800 text-zinc-50">
         <DialogHeader>
           <DialogTitle>Post a Micro-Grant</DialogTitle>

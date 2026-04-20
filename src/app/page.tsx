@@ -35,7 +35,7 @@ export default function Home() {
           </span>
         </h2>
         <p className="text-lg md:text-xl text-zinc-400 mb-12 font-mono max-w-2xl mx-auto uppercase tracking-wide">
-          > Launch a project token on Bags, auto-fund your community, and distribute micro-grants directly to builders. All on Solana.
+          &gt; Launch a project token on Bags, auto-fund your community, and distribute micro-grants directly to builders. All on Solana.
         </p>
 
         {connected ? (
@@ -66,14 +66,15 @@ export default function Home() {
         ) : (
           <div className="p-8 border border-zinc-800 bg-black/80 backdrop-blur-md inline-block shadow-[0_0_30px_rgba(0,0,0,0.8)] rounded-none">
             <p className="text-cyan-400 font-mono font-medium tracking-widest uppercase">
-              > _Awaiting Solana Connection...
+              &gt; _Awaiting Solana Connection...
             </p>
           </div>
         )}
       </section>
 
       <footer className="mt-auto pt-24 font-mono text-zinc-600 text-xs uppercase tracking-widest">
-        // Built for the Bags Hackathon.
+        {/* Built for the Bags Hackathon. */}
+        Built for the Bags Hackathon.
       </footer>
     </main>
   );

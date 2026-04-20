@@ -7,7 +7,6 @@ import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Loader2, ArrowLeft, Coins, CheckCircle, Clock } from 'lucide-react';
 import Link from 'next/link';
 import { SubmitWorkModal } from '@/components/SubmitWorkModal';
-import { Button } from '@/components/ui/button';
 
 interface Bounty {
   id: string;

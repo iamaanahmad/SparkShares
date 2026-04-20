@@ -41,7 +41,7 @@ export function ViewBountiesModal({ projectId, projectName }: { projectId: strin
 
       if (grantsErr) throw grantsErr;
       
-      const grants = (grantsData || []) as MicroGrant[];
+      const grants = (grantsData || []) as unknown as MicroGrant[];
 
       // Step 2: If we have bounties, fetch their submissions
       if (grants.length > 0) {
@@ -86,11 +86,11 @@ export function ViewBountiesModal({ projectId, projectName }: { projectId: strin
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
+      <DialogTrigger render={
         <Button className="w-full bg-zinc-800 hover:bg-zinc-700 text-sm font-medium" variant="outline">
           <ListChecks size={16} className="mr-2" /> Manage Bounties
         </Button>
-      </DialogTrigger>
+      } />
       <DialogContent className="sm:max-w-[700px] max-h-[80vh] overflow-y-auto bg-zinc-950 border-zinc-800 text-zinc-50">
         <DialogHeader>
           <DialogTitle>Manage Active Bounties</DialogTitle>

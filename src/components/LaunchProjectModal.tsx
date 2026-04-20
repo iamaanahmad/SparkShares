@@ -121,11 +121,11 @@ export function LaunchProjectModal() {
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
+      <DialogTrigger render={
         <Button size="lg" className="w-full sm:w-auto rounded-none font-mono font-bold uppercase tracking-widest bg-yellow-400 border border-yellow-400 text-black hover:bg-yellow-300 hover:shadow-[0_0_20px_rgba(250,204,21,0.6)] px-8 transition-all">
           Launch Your Project
         </Button>
-      </DialogTrigger>
+      } />
       <DialogContent className="sm:max-w-md md:max-w-2xl bg-black border border-cyan-500/50 rounded-none text-cyan-50 shadow-[0_0_50px_rgba(34,211,238,0.2)] p-0 overflow-hidden">
         {/* Top decorative bar */}
         <div className="h-1 w-full bg-gradient-to-r from-cyan-400 via-fuchsia-500 to-yellow-400" />
@@ -133,11 +133,12 @@ export function LaunchProjectModal() {
         <div className="p-6 md:p-8">
           <DialogHeader className="mb-6">
             <DialogTitle className="text-2xl font-mono font-bold tracking-widest uppercase text-cyan-400 drop-shadow-[0_0_8px_rgba(34,211,238,0.5)]">
-              // Deploy On Bags
+              {/* Deploy On Bags */}
+              Deploy On Bags
             </DialogTitle>
             <DialogDescription className="text-zinc-400 font-mono text-sm uppercase tracking-widest mt-2 border-l-2 border-cyan-500/50 pl-3">
-              > Initializing token schema parameters...<br/>
-              > Awaiting user input parameters...
+              &gt; Initializing token schema parameters...<br/>
+              &gt; Awaiting user input parameters...
             </DialogDescription>
           </DialogHeader>
           

@@ -20,11 +20,9 @@ export const WalletProvider: FC<{ children: ReactNode }> = ({ children }) => {
     );
 
     return (
-        // @ts-expect-error - Ignore React 18 children type mismatch with Solana wallet adapters
+        // @ts-expect-error Disable react 18 type bug
         <ConnectionProvider endpoint={endpoint}>
-            {/* @ts-expect-error - Expected wallet mismatch */}
             <SolanaWalletProvider wallets={wallets} autoConnect>
-                {/* @ts-expect-error - Expected children mismatch */}
                 <WalletModalProvider>{children}</WalletModalProvider>
             </SolanaWalletProvider>
         </ConnectionProvider>

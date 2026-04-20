@@ -47,14 +47,14 @@ export function SubmitWorkModal({ bountyId, bountyTitle }: { bountyId: string; b
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
+      <DialogTrigger render={
         <Button 
           className="w-full font-semibold bg-indigo-600 hover:bg-indigo-500 text-white" 
           disabled={!connected}
         >
           {connected ? 'Submit Work' : 'Connect Wallet to Submit'}
         </Button>
-      </DialogTrigger>
+      } />
       <DialogContent className="sm:max-w-[425px] bg-zinc-950 border-zinc-800 text-zinc-50">
         <DialogHeader>
           <DialogTitle>Submit Your Work</DialogTitle>
