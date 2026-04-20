@@ -1,0 +1,40 @@
+About Bags
+Bags is building the future of creator funding. We believe that great ideas should have the opportunity to get funded without traditional gatekeepers. Our platform empowers creators, developers, and builders to launch projects, build communities, and earn royalties from their work.
+
+Hackathon Overview
+The Bags Hackathon invites developers, creators, and builders from across the Solana ecosystem to create applications, tools, and experiences that push the boundaries of what is possible on the Bags platform. With over $1 million in direct prizes, $3 million in ongoing funding and support, and hardware prizes for winners, this is one of the largest creator-finance hackathons in crypto. Whether participants are experienced Solana developers or newcomers with a great idea, the Bags Hackathon is an opportunity to build something meaningful, get funded, and join a growing ecosystem of builders who are redefining how creators monetize online.
+
+Submission Requirements
+All projects must be launched on Bags
+App Icon - Square logo or icon representing the project
+App Name - Name of the project or application
+Description - Clear, detailed description of what the project does, the problem it solves, and how it leverages Bags
+Links - Site - Project website URL
+Links - GitHub - GitHub repository link
+Category - Hackathon track selection
+Coin Details - Token status for the project
+Demo Video - Short video (3-5 minutes) demonstrating the project in action
+Contact - X Profile - Team or lead X (Twitter) handle
+Rules & Eligibility
+Open to individuals and teams worldwide. No restrictions on team size.
+Projects are required to have a token linked to the project whether it be launched before or during application process.
+Projects must be new work or significant new features built during the hackathon period. Pre-existing projects may enter only if substantial new functionality is added.
+Submissions that integrate with the Bags platform in a meaningful way (API, SDK, token launching, trading, or creator tools) will rank higher for a better chance to win.
+Open-source projects are strongly encouraged. Private repositories must provide judge access.
+Teams may submit to only one track per project.
+All participants must comply with applicable laws and regulations. Bags reserves the right to disqualify any submission that violates terms of service or community guidelines.
+Judges' decisions are final.
+Prize Structure
+The prize pool is $1M. The top 100 projects each receive a grant between $10,000 and $100,000. Projects that ship and get traction will be rewarded.
+
+Builder Resources
+Bags — https://bags.fm/
+Developer Documentation — https://docs.bags.fm/
+Developer Portal — https://dev.bags.fm/login
+Typescript SDK — https://www.npmjs.com/package/@bagsfm/bags-sdk
+Contact
+For questions, inquiries, or any coordination related to the Bags Hackathon:
+
+Discord (recommended): https://discord.gg/bagsapp
+
+X (Twitter): @BagsHackathon @StuuBags @Sambags12

@@ -1,0 +1,94 @@
+Project name: SparkShares — Tokenized Micro‑Grant Marketplace for Creators
+
+Elevator pitch  
+A lightweight marketplace on Bags where creators post micro‑grant bounties (small tasks, ideas, or mini‑projects) funded by community wallets and brands. Backers buy SparkShares (project tokens) and automatically distribute micro‑grants to contributors; creators keep royalties and can route fee sharing to collaborators. This turns passive token launches into active community funding engines.
+
+Why this idea wins
+Directly leverages Bags features: requires a token and launch on Bags, and benefits from fee‑sharing and founder/admin modes. 
+
+High product‑market fit: creators want funding + discoverability; backers want low‑friction ways to support and earn.
+
+Easy to demo: create a project, mint token, post a bounty, accept submissions, distribute micro‑grants — all within 3–5 minutes.
+
+Judges love integrations: using Bags SDK + Solana wallets shows platform adoption and technical competence.
+
+Core features to build (MVP)
+Project launch flow: create project on Bags via SDK; auto‑fill token and fee‑sharing options. 
+
+Micro‑grant bounties: creators post tasks with small SOL or token rewards.
+
+Backer pool: users contribute to a bounty pool by buying project tokens or sending SOL.
+
+Automated payout: on selection, smart contract distributes micro‑grants and updates token holders’ dashboards.
+
+Simple moderation: creator approves winners; optional community voting.
+
+Analytics dashboard: show funds raised, payouts, and fee splits for judges.
+
+Tech stack and integrations
+Frontend: React + TypeScript (use Bags TypeScript SDK).
+
+Blockchain: Solana programs (Anchor) for payout logic; use SPL tokens for tokenized shares.
+
+Bags integration: Bags launch API/SDK to create project, token metadata, and fee sharing. 
+
+Wallets: Phantom / Solflare for auth and transactions.
+
+Hosting: Vercel or Netlify for quick deployment.
+
+Tokenomics and judge‑friendly mechanics
+Token role: buying project tokens funds bounty pools and grants backers governance perks.
+
+Fee sharing: route a small percentage of trading fees to creators and curators (demonstrates Bags features). 
+
+Low friction: require minimal SOL for tx fees (note Bags page shows users need ~0.2 SOL for transactions; plan demo wallets accordingly). 
+
+7‑step hackathon roadmap (43 days left is plenty)
+Day 1–3: scaffold frontend, connect wallet, integrate Bags SDK.
+
+Day 4–10: implement project launch flow and token minting.
+
+Day 11–18: build bounty creation and backer pool UI.
+
+Day 19–26: write Solana program for payouts and fee splits.
+
+Day 27–33: analytics dashboard and community voting.
+
+Day 34–38: polish UI, record demo video (3–5 min).
+
+Day 39–43: finalize submission, test on mainnet/devnet, prepare GitHub and docs.
+
+Demo script judges will love
+30s: show Bags project creation and token minted. 
+
+60s: post a micro‑grant bounty and fund it via token purchase.
+
+60s: show a contributor submitting work and creator approving.
+
+30s: show automated payout and analytics updating.
+
+30s: explain roadmap and how Bags integrations enable growth.
+
+Submission checklist mapped to Bags requirements
+App icon/logo — include polished icon.
+
+Project name & description — concise, benefit‑focused.
+
+Website & GitHub — public repo; grant judge access if private.
+
+Hackathon track selection — pick the most relevant track.
+
+Token details — ticker, supply, utility explained. 
+
+Demo video (3–5 minutes) — follow the demo script above.
+
+Contact info (Twitter/X handle) — include for follow up.
+
+Ensure at least 0.2 SOL in demo wallets to cover transaction fees during live demo. 
+
+Quick risks and mitigations
+Smart contract bugs — keep payout logic minimal and audited by unit tests.
+
+UX friction for non‑crypto users — provide a guided wallet setup and demo funds on devnet.
+
+Time constraints — prioritize core flows: launch → fund → payout → analytics.
