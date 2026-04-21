@@ -97,9 +97,13 @@ export default function Dashboard() {
                     Bags Mint: {project.bags_token_mint || 'Pending...'}
                   </div>
                   
-                  <div className="pt-2 flex gap-2">
-                    <CreateBountyModal projectId={project.id} projectName={project.name} />
-                    <ViewBountiesModal projectId={project.id} projectName={project.name} />
+                  <div className="pt-2 flex flex-col sm:flex-row w-full gap-3">
+                    <div className="flex-1">
+                      <CreateBountyModal projectId={project.id} projectName={project.name} />
+                    </div>
+                    <div className="flex-1">
+                      <ViewBountiesModal projectId={project.id} projectName={project.name} />
+                    </div>
                   </div>
                 </CardContent>
               </Card>
