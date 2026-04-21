@@ -1,0 +1,180 @@
+
+ ✓ Compiled successfully
+   Linting and checking validity of types ...
+Failed to compile.
+./src/components/WalletProvider.tsx:23:9
+Type error: Unused '@ts-expect-error' directive.
+  21 |
+  22 |     return (
+> 23 |         // @ts-expect-error Disable react 18 type bug
+     |         ^
+  24 |         <ConnectionProvider endpoint={endpoint}>
+  25 |             <SolanaWalletProvider wallets={wallets} autoConnect>
+  26 |                 <WalletModalProvider>{children}</WalletModalProvider>
+Next.js build worker exited with code: 1 and signal: null
+Error: Command "npm run build" exited with 1
+
+
+
+[18:34:27] [open-runtimes] Environment preparation started. 
+[18:34:27] [open-runtimes] Environment preparation finished. 
+[18:34:27] [open-runtimes] Build command execution started. 
+npm warn ERESOLVE overriding peer dependency
+npm warn While resolving: qrcode.react@1.0.1
+npm warn Found: react@18.3.1
+npm warn node_modules/react
+npm warn   react@"^18" from the root project
+npm warn   21 more (@base-ui/react, use-sync-external-store, ...)
+npm warn
+npm warn Could not resolve dependency:
+npm warn peer react@"^15.5.3 || ^16.0.0 || ^17.0.0" from qrcode.react@1.0.1
+npm warn node_modules/@keystonehq/sdk/node_modules/qrcode.react
+npm warn   qrcode.react@"^1.0.1" from @keystonehq/sdk@0.19.2
+npm warn   node_modules/@keystonehq/sdk
+npm warn
+npm warn Conflicting peer dependency: react@17.0.2
+npm warn node_modules/react
+npm warn   peer react@"^15.5.3 || ^16.0.0 || ^17.0.0" from qrcode.react@1.0.1
+npm warn   node_modules/@keystonehq/sdk/node_modules/qrcode.react
+npm warn     qrcode.react@"^1.0.1" from @keystonehq/sdk@0.19.2
+npm warn     node_modules/@keystonehq/sdk
+npm warn ERESOLVE overriding peer dependency
+npm warn While resolving: react-qr-reader@2.2.1
+npm warn Found: react@18.3.1
+npm warn node_modules/react
+npm warn   react@"^18" from the root project
+npm warn   21 more (@base-ui/react, use-sync-external-store, ...)
+npm warn
+npm warn Could not resolve dependency:
+npm warn peer react@"~16" from react-qr-reader@2.2.1
+npm warn node_modules/@keystonehq/sdk/node_modules/react-qr-reader
+npm warn   react-qr-reader@"^2.2.1" from @keystonehq/sdk@0.19.2
+npm warn   node_modules/@keystonehq/sdk
+npm warn
+npm warn Conflicting peer dependency: react@16.14.0
+npm warn node_modules/react
+npm warn   peer react@"~16" from react-qr-reader@2.2.1
+npm warn   node_modules/@keystonehq/sdk/node_modules/react-qr-reader
+npm warn     react-qr-reader@"^2.2.1" from @keystonehq/sdk@0.19.2
+npm warn     node_modules/@keystonehq/sdk
+npm warn ERESOLVE overriding peer dependency
+npm warn While resolving: react-qr-reader@2.2.1
+npm warn Found: react-dom@18.3.1
+npm warn node_modules/react-dom
+npm warn   react-dom@"^18" from the root project
+npm warn   10 more (@base-ui/react, @base-ui/utils, ...)
+npm warn
+npm warn Could not resolve dependency:
+npm warn peer react-dom@"~16" from react-qr-reader@2.2.1
+npm warn node_modules/@keystonehq/sdk/node_modules/react-qr-reader
+npm warn   react-qr-reader@"^2.2.1" from @keystonehq/sdk@0.19.2
+npm warn   node_modules/@keystonehq/sdk
+npm warn
+npm warn Conflicting peer dependency: react-dom@16.14.0
+npm warn node_modules/react-dom
+npm warn   peer react-dom@"~16" from react-qr-reader@2.2.1
+npm warn   node_modules/@keystonehq/sdk/node_modules/react-qr-reader
+npm warn     react-qr-reader@"^2.2.1" from @keystonehq/sdk@0.19.2
+npm warn     node_modules/@keystonehq/sdk
+npm warn ERESOLVE overriding peer dependency
+npm warn While resolving: react-native@0.85.1
+npm warn Found: react@18.3.1
+npm warn node_modules/react
+npm warn   react@"^18" from the root project
+npm warn   21 more (@base-ui/react, use-sync-external-store, ...)
+npm warn
+npm warn Could not resolve dependency:
+npm warn peer react@"^19.2.3" from react-native@0.85.1
+npm warn node_modules/@solana/wallet-adapter-react/node_modules/react-native
+npm warn   peer react-native@"^0.0.0-0 || >=0.60 <1.0" from @react-native-async-storage/async-storage@1.24.0
+npm warn   node_modules/@solana/wallet-adapter-react/node_modules/@react-native-async-storage/async-storage
+npm warn   3 more (@solana-mobile/mobile-wallet-adapter-protocol, ...)
+npm warn
+npm warn Conflicting peer dependency: react@19.2.5
+npm warn node_modules/react
+npm warn   peer react@"^19.2.3" from react-native@0.85.1
+npm warn   node_modules/@solana/wallet-adapter-react/node_modules/react-native
+npm warn     peer react-native@"^0.0.0-0 || >=0.60 <1.0" from @react-native-async-storage/async-storage@1.24.0
+npm warn     node_modules/@solana/wallet-adapter-react/node_modules/@react-native-async-storage/async-storage
+npm warn     3 more (@solana-mobile/mobile-wallet-adapter-protocol, ...)
+npm warn deprecated uuidv4@6.2.13: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
+npm warn deprecated rimraf@3.0.2: Rimraf versions prior to v4 are no longer supported
+npm warn deprecated lodash.isequal@4.5.0: This package is deprecated. Use require('node:util').isDeepStrictEqual instead.
+npm warn deprecated inflight@1.0.6: This module is not supported, and leaks memory. Do not use it. Check out lru-cache if you want a good and tested way to coalesce async requests by a key value, which is much more comprehensive and powerful.
+npm warn deprecated glob@10.3.10: Old versions of glob are not supported, and contain widely publicized security vulnerabilities, which have been fixed in the current version. Please update. Support for old versions may be purchased (at exorbitant rates) by contacting i@izs.me
+npm warn deprecated @humanwhocodes/object-schema@2.0.3: Use @eslint/object-schema instead
+npm warn deprecated @humanwhocodes/config-array@0.13.0: Use @eslint/config-array instead
+npm warn deprecated glob@7.2.3: Old versions of glob are not supported, and contain widely publicized security vulnerabilities, which have been fixed in the current version. Please update. Support for old versions may be purchased (at exorbitant rates) by contacting i@izs.me
+npm warn deprecated glob@7.2.0: Old versions of glob are not supported, and contain widely publicized security vulnerabilities, which have been fixed in the current version. Please update. Support for old versions may be purchased (at exorbitant rates) by contacting i@izs.me
+npm warn deprecated @toruslabs/solana-embed@2.1.0: This sdk is now deprecated. Please use @web3auth/ws-embed instead
+npm warn deprecated @walletconnect/sign-client@2.19.0: Reliability and performance improvements. See: https://github.com/WalletConnect/walletconnect-monorepo/releases
+npm warn deprecated @walletconnect/universal-provider@2.19.0: Reliability and performance improvements. See: https://github.com/WalletConnect/walletconnect-monorepo/releases
+npm warn deprecated @walletconnect/sign-client@2.19.1: Reliability and performance improvements. See: https://github.com/WalletConnect/walletconnect-monorepo/releases
+npm warn deprecated @walletconnect/sign-client@2.19.1: Reliability and performance improvements. See: https://github.com/WalletConnect/walletconnect-monorepo/releases
+npm warn deprecated @walletconnect/sign-client@2.19.1: Reliability and performance improvements. See: https://github.com/WalletConnect/walletconnect-monorepo/releases
+npm warn deprecated @walletconnect/universal-provider@2.19.1: Reliability and performance improvements. See: https://github.com/WalletConnect/walletconnect-monorepo/releases
+npm warn deprecated @walletconnect/universal-provider@2.19.1: Reliability and performance improvements. See: https://github.com/WalletConnect/walletconnect-monorepo/releases
+npm warn deprecated @walletconnect/universal-provider@2.19.1: Reliability and performance improvements. See: https://github.com/WalletConnect/walletconnect-monorepo/releases
+npm warn deprecated eslint@8.57.1: This version is no longer supported. Please see https://eslint.org/version-support for other options.
+npm error code 1
+npm error path /usr/local/build/node_modules/usb
+npm error command failed
+npm error command sh -c node-gyp-build
+npm error make: Entering directory '/usr/local/build/node_modules/usb/build'
+npm error   CC(target) Release/obj.target/libusb/libusb/libusb/core.o
+npm error   CC(target) Release/obj.target/libusb/libusb/libusb/descriptor.o
+npm error   CC(target) Release/obj.target/libusb/libusb/libusb/hotplug.o
+npm error   CC(target) Release/obj.target/libusb/libusb/libusb/io.o
+npm error   CC(target) Release/obj.target/libusb/libusb/libusb/strerror.o
+npm error   CC(target) Release/obj.target/libusb/libusb/libusb/sync.o
+npm error   CC(target) Release/obj.target/libusb/libusb/libusb/os/events_posix.o
+npm error   CC(target) Release/obj.target/libusb/libusb/libusb/os/threads_posix.o
+npm error   CC(target) Release/obj.target/libusb/libusb/libusb/os/linux_usbfs.o
+npm error make: Leaving directory '/usr/local/build/node_modules/usb/build'
+npm error gyp info it worked if it ends with ok
+npm error gyp info using node-gyp@11.2.0
+npm error gyp info using node@22.22.0 | linux | x64
+npm error gyp info find Python using Python version 3.12.12 found at "/usr/bin/python3"
+npm error gyp info spawn /usr/bin/python3
+npm error gyp info spawn args [
+npm error gyp info spawn args '/usr/local/lib/node_modules/npm/node_modules/node-gyp/gyp/gyp_main.py',
+npm error gyp info spawn args 'binding.gyp',
+npm error gyp info spawn args '-f',
+npm error gyp info spawn args 'make',
+npm error gyp info spawn args '-I',
+npm error gyp info spawn args '/usr/local/build/node_modules/usb/build/config.gypi',
+npm error gyp info spawn args '-I',
+npm error gyp info spawn args '/usr/local/lib/node_modules/npm/node_modules/node-gyp/addon.gypi',
+npm error gyp info spawn args '-I',
+npm error gyp info spawn args '/root/.cache/node-gyp/22.22.0/include/node/common.gypi',
+npm error gyp info spawn args '-Dlibrary=shared_library',
+npm error gyp info spawn args '-Dvisibility=default',
+npm error gyp info spawn args '-Dnode_root_dir=/root/.cache/node-gyp/22.22.0',
+npm error gyp info spawn args '-Dnode_gyp_dir=/usr/local/lib/node_modules/npm/node_modules/node-gyp',
+npm error gyp info spawn args '-Dnode_lib_file=/root/.cache/node-gyp/22.22.0/<(target_arch)/node.lib',
+npm error gyp info spawn args '-Dmodule_root_dir=/usr/local/build/node_modules/usb',
+npm error gyp info spawn args '-Dnode_engine=v8',
+npm error gyp info spawn args '--depth=.',
+npm error gyp info spawn args '--no-parallel',
+npm error gyp info spawn args '--generator-output',
+npm error gyp info spawn args 'build',
+npm error gyp info spawn args '-Goutput_dir=.'
+npm error gyp info spawn args ]
+npm error gyp info spawn make
+npm error gyp info spawn args [ 'BUILDTYPE=Release', '-C', 'build' ]
+npm error In file included from ../libusb/libusb/os/linux_usbfs.c:26:
+npm error ../libusb/libusb/os/linux_usbfs.h:24:10: fatal error: linux/magic.h: No such file or directory
+npm error    24 | #include <linux/magic.h>
+npm error       |          ^~~~~~~~~~~~~~~
+npm error compilation terminated.
+npm error make: *** [libusb.target.mk:155: Release/obj.target/libusb/libusb/libusb/os/linux_usbfs.o] Error 1
+npm error gyp ERR! build error 
+npm error gyp ERR! stack Error: `make` failed with exit code: 2
+npm error gyp ERR! stack at ChildProcess.<anonymous> (/usr/local/lib/node_modules/npm/node_modules/node-gyp/lib/build.js:219:23)
+npm error gyp ERR! System Linux 6.14.0-1018-aws
+npm error gyp ERR! command "/usr/local/bin/node" "/usr/local/lib/node_modules/npm/node_modules/node-gyp/bin/node-gyp.js" "rebuild"
+npm error gyp ERR! cwd /usr/local/build/node_modules/usb
+npm error gyp ERR! node -v v22.22.0
+npm error gyp ERR! node-gyp -v v11.2.0
+npm error gyp ERR! not ok
+npm error A complete log of this run can be found in: /root/.npm/_logs/2026-04-20T18_34_27_568Z-debug-0.log
