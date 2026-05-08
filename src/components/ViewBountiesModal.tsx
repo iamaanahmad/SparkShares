@@ -1,12 +1,12 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { supabase } from '@/lib/supabase';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Loader2, ExternalLink, ListChecks } from 'lucide-react';
 import { ApproveSubmissionButton } from './ApproveSubmissionButton';
 import { toast } from 'sonner';
+import { listBountiesByProject, listSubmissions } from '@/lib/appwrite';
 
 interface Submission {
   id: string;
@@ -32,39 +32,28 @@ export function ViewBountiesModal({ projectId, projectName }: { projectId: strin
   const fetchBounties = async () => {
     setIsLoading(true);
     try {
-      // Step 1: Fetch the Bounties safely without a restrictive join
-      const { data: grantsData, error: grantsErr } = await supabase
-        .from('micro_grants')
-        .select('id, title, reward_amount, status, created_at')
-        .eq('project_id', projectId)
-        .order('created_at', { ascending: false });
+      const [grants, subsData] = await Promise.all([
+        listBountiesByProject(projectId),
+        listSubmissions(),
+      ]);
 
-      if (grantsErr) throw grantsErr;
-      
-      const grants = (grantsData || []) as unknown as MicroGrant[];
-
-      // Step 2: If we have bounties, fetch their submissions
-      if (grants.length > 0) {
-        const grantIds = grants.map(g => g.id);
-        const { data: subsData, error: subsErr } = await supabase
-          .from('submissions')
-          .select('id, grant_id, submitter_wallet, content, created_at')
-          .in('grant_id', grantIds);
-
-        if (subsErr) {
-          console.warn('Submissions fetch error (ignoring to show bounties):', subsErr);
-        }
-
-        // Map submissions back to their respective bounties
-        const mappedGrants = grants.map(g => ({
-          ...g,
-          submissions: subsData?.filter(sub => sub.grant_id === g.id) || []
-        }));
-
-        setBounties(mappedGrants);
-      } else {
-        setBounties([]);
-      }
+      setBounties(
+        grants.map((grant) => ({
+          id: grant.$id,
+          title: grant.title,
+          reward_amount: grant.reward_amount,
+          status: grant.status,
+          submissions: subsData
+            .filter((sub) => sub.grant_id === grant.$id)
+            .map((sub) => ({
+              id: sub.$id,
+              grant_id: sub.grant_id,
+              submitter_wallet: sub.submitter_wallet,
+              content: sub.content,
+              created_at: sub.created_at,
+            })),
+        }))
+      );
     } catch (err: unknown) {
       console.error('Error fetching bounties:', err);
       toast.error('Failed to load bounties', {

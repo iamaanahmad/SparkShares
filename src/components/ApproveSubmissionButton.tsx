@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useWallet, useConnection } from '@solana/wallet-adapter-react';
 import { PublicKey, SystemProgram, Transaction } from '@solana/web3.js';
-import { supabase } from '@/lib/supabase';
+import { completeBounty } from '@/lib/appwrite';
 import { Button } from '@/components/ui/button';
 import { Loader2, CheckCircle } from 'lucide-react';
 import { toast } from 'sonner';
@@ -57,11 +57,7 @@ export function ApproveSubmissionButton({
       console.log(`Payout successful! Tx: ${signature}`);
 
       // 2. Mark the bounty as completed so no one else submits
-      const { error: grantErr } = await supabase
-        .from('micro_grants')
-        .update({ status: 'completed' })
-        .eq('id', bountyId);
-      if (grantErr) throw grantErr;
+      await completeBounty(bountyId);
 
       toast.success('Bounty Paid', {
         description: `Successfully sent ${rewardAmount} SOL to ${submitterWallet.slice(0,6)}...${submitterWallet.slice(-4)}`

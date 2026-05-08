@@ -1,8 +1,15 @@
 {
   "servers": {
-    "supabase": {
-      "type": "http",
-      "url": "https://mcp.supabase.com/mcp?project_ref=litjmxpwlsmiugvzsmnr"
+    "appwrite-api": {
+      "command": "uvx",
+      "args": [
+        "mcp-server-appwrite"
+      ],
+      "env": {
+        "APPWRITE_PROJECT_ID": "69a98e640030629262b0",
+        "APPWRITE_API_KEY": "standard_7bf0fa7ccb8b2102a8e8fdac7cf1357ea3f1dd29e07b3030d550d9edb7445a2500b5095f8cf5f248cad4c0b15866bc258b80bf63a63415d1530a0bbb69528f32262fd3998dac96697476ba6b5b6d90a7c4f251cb49d84d85d20ec18a548963041a9940d38924fc8fc6dcada5131a10a04e42519d4cf969b046411e61ac028086",
+        "APPWRITE_ENDPOINT": "https://citorg.in/v1"
+      }
     }
   }
 }

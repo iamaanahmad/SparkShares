@@ -35,7 +35,7 @@ A lightweight marketplace on the Bags platform where creators post **micro‑gra
 ## ⚙️ Tech Stack
 
 - **Frontend:** Next.js 14, React, Tailwind CSS, Shadcn UI
-- **Database / Backend:** Supabase (PostgreSQL)
+- **Database / Backend:** Appwrite Tables DB (self-hosted)
 - **Web3 Ecosystem:** Solana Web3.js, Wallet Adapter (Phantom, Solflare)
 - **Host Platform:** Bags SDK + Platform APIs
 
@@ -45,7 +45,7 @@ A lightweight marketplace on the Bags platform where creators post **micro‑gra
 
 ### Prerequisites
 - Node.js >= 18
-- A Supabase Project
+- An Appwrite project / self-hosted Appwrite instance
 - A Solana Wallet (Phantom) set to Devnet
 - Devnet SOL (for mocked Bags SDK transactions)
 
@@ -65,8 +65,9 @@ A lightweight marketplace on the Bags platform where creators post **micro‑gra
 3. **Set up Environment Variables:**
    Create a `.env.local` file at the root:
    ```env
-   NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
-   NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+   NEXT_PUBLIC_APPWRITE_ENDPOINT=your_appwrite_endpoint
+   NEXT_PUBLIC_APPWRITE_PROJECT_ID=your_appwrite_project_id
+   NEXT_PUBLIC_APPWRITE_DATABASE_ID=sparkshares
    ```
 
 4. **Run the development server:**
@@ -80,7 +81,7 @@ A lightweight marketplace on the Bags platform where creators post **micro‑gra
 
 ## 🏆 Hackathon Notes (For Judges)
 - **Bags Launch Fallback:** The Bags SDK Metaora integration currently requires Mainnet API keys for full fluid curves. For the sake of this Devnet prototype, the project launch routes default to a `MockTokenMintAddress_Devnet` safe fallback to demonstrate the UI/UX end-to-end without spending real Mainnet SOL.
-- **Database Schema:** We heavily utilized relational Postgres mapping on Supabase (e.g., mapping `grant_id` and `content` from contributors back to exactly which creator bounties hold status allocations).
+- **Database Schema:** We now use Appwrite Tables DB for projects, bounties, submissions, and backings so the app can run on a self-hosted backend.
 
 ---
 

@@ -2,12 +2,12 @@
 
 import { useEffect, useState } from 'react';
 import { useWallet } from '@solana/wallet-adapter-react';
-import { supabase } from '@/lib/supabase';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Loader2, ArrowLeft, Coins, CheckCircle, Clock } from 'lucide-react';
 import Link from 'next/link';
 import { SubmitWorkModal } from '@/components/SubmitWorkModal';
 import { FundBountyModal } from '@/components/FundBountyModal';
+import { listBounties, listProjects, listSubmissions } from '@/lib/appwrite';
 
 interface Bounty {
   id: string;
@@ -17,10 +17,8 @@ interface Bounty {
   reward_amount: number;
   status: string;
   created_at: string;
-  projects?: {
-    name: string;
-    creator_wallet?: string;
-  };
+  project_name?: string;
+  creator_wallet?: string;
   submissions?: {
     submitter_wallet: string;
   }[];
@@ -34,17 +32,33 @@ export default function BountiesPage() {
   useEffect(() => {
     const fetchBounties = async () => {
       try {
-        const { data, error } = await supabase
-          .from('micro_grants')
-          .select(`
-            *,
-            projects ( name, creator_wallet ),
-            submissions ( submitter_wallet )
-          `)
-          .order('created_at', { ascending: false });
+        const [projectRows, bountyRows, submissionRows] = await Promise.all([
+          listProjects(),
+          listBounties(),
+          listSubmissions(),
+        ]);
 
-        if (error) throw error;
-        setBounties((data as Bounty[]) || []);
+        const projectMap = new Map(projectRows.map((project) => [project.$id, project]));
+
+        const mappedBounties = bountyRows.map((bounty) => {
+          const relatedProject = projectMap.get(bounty.project_id);
+          return {
+            id: bounty.$id,
+            project_id: bounty.project_id,
+            title: bounty.title,
+            description: bounty.description,
+            reward_amount: bounty.reward_amount,
+            status: bounty.status,
+            created_at: bounty.created_at,
+            project_name: relatedProject?.name || 'Unknown Project',
+            creator_wallet: relatedProject?.creator_wallet,
+            submissions: submissionRows
+              .filter((submission) => submission.grant_id === bounty.$id)
+              .map((submission) => ({ submitter_wallet: submission.submitter_wallet })),
+          } as Bounty;
+        });
+
+        setBounties(mappedBounties);
       } catch (err) {
         console.error('Error fetching bounties:', err);
       } finally {
@@ -91,7 +105,7 @@ export default function BountiesPage() {
                     <div className="flex justify-between items-start gap-4">
                       <div>
                         <p className="text-xs text-indigo-400 font-bold uppercase tracking-wider mb-1">
-                          {bounty.projects?.name || 'Unknown Project'}
+                          {bounty.project_name || 'Unknown Project'}
                         </p>
                         <CardTitle className="leading-tight flex items-center gap-3">
                           {bounty.title}
@@ -130,7 +144,7 @@ export default function BountiesPage() {
                           <FundBountyModal
                             bountyId={bounty.id}
                             bountyTitle={bounty.title}
-                            projectCreatorWallet={bounty.projects?.creator_wallet || ''}
+                            projectCreatorWallet={bounty.creator_wallet || ''}
                             currentFunded={bounty.reward_amount}
                           />
                         </div>

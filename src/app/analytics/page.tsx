@@ -1,10 +1,10 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { supabase } from '@/lib/supabase';
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from '@/components/ui/card';
 import { Loader2, ArrowLeft, TrendingUp, Users, Zap, Award } from 'lucide-react';
 import Link from 'next/link';
+import { listBounties, listProjects, listSubmissions } from '@/lib/appwrite';
 
 interface ProjectStats {
   projectId: string;
@@ -29,42 +29,26 @@ export default function AnalyticsPage() {
   useEffect(() => {
     const fetchAnalytics = async () => {
       try {
-        // Fetch all projects
-        const { data: projects, error: projErr } = await supabase
-          .from('projects')
-          .select('*')
-          .order('created_at', { ascending: false });
-
-        if (projErr) throw projErr;
-
-        // Fetch all bounties
-        const { data: bounties, error: bountyErr } = await supabase
-          .from('micro_grants')
-          .select('id, project_id, reward_amount, status');
-
-        if (bountyErr) throw bountyErr;
-
-        // Fetch all submissions
-        const { data: submissions, error: subErr } = await supabase
-          .from('submissions')
-          .select('id, grant_id');
-
-        if (subErr) throw subErr;
+        const [projects, bounties, submissions] = await Promise.all([
+          listProjects(),
+          listBounties(),
+          listSubmissions(),
+        ]);
 
         // Calculate stats per project
-        const projectStats: ProjectStats[] = (projects || []).map(project => {
-          const projectBounties = (bounties || []).filter(b => b.project_id === project.id);
-          const projectSubmissions = (submissions || []).filter(sub => 
-            projectBounties.some(b => b.id === sub.grant_id)
+        const projectStats: ProjectStats[] = projects.map(project => {
+          const projectBounties = bounties.filter((bounty) => bounty.project_id === project.$id);
+          const projectSubmissions = submissions.filter((submission) =>
+            projectBounties.some((bounty) => bounty.$id === submission.grant_id)
           );
-          const completedBounties = projectBounties.filter(b => b.status === 'completed');
+          const completedBounties = projectBounties.filter((bounty) => bounty.status === 'completed');
           
-          const totalDistributed = completedBounties.reduce((sum, b) => sum + (b.reward_amount || 0), 0);
+          const totalDistributed = completedBounties.reduce((sum, bounty) => sum + (bounty.reward_amount || 0), 0);
 
           return {
-            projectId: project.id,
+            projectId: project.$id,
             projectName: project.name,
-            totalFundsRaised: projectBounties.reduce((sum, b) => sum + (b.reward_amount || 0), 0),
+            totalFundsRaised: projectBounties.reduce((sum, bounty) => sum + (bounty.reward_amount || 0), 0),
             totalFundsDistributed: totalDistributed,
             bountyCount: projectBounties.length,
             submissionCount: projectSubmissions.length,
@@ -80,7 +64,7 @@ export default function AnalyticsPage() {
         const totalSubmissions = projectStats.reduce((sum, p) => sum + p.submissionCount, 0);
 
         setGlobalStats({
-          totalProjects: projectStats.length,
+          totalProjects: projects.length,
           totalBounties,
           totalSubmissions,
           totalDistributed,

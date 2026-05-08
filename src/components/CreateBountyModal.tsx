@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { supabase } from '@/lib/supabase';
+import { createBounty } from '@/lib/appwrite';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -23,15 +23,13 @@ export function CreateBountyModal({ projectId, projectName }: { projectId: strin
     setIsLoading(true);
 
     try {
-      const { error } = await supabase.from('micro_grants').insert({
+      await createBounty({
         project_id: projectId,
         title: formData.title,
         description: formData.description,
         reward_amount: parseFloat(formData.reward_amount),
-        status: 'open'
+        status: 'open',
       });
-
-      if (error) throw error;
       
       setOpen(false);
       setFormData({ title: '', description: '', reward_amount: '' });

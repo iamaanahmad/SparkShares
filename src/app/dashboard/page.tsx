@@ -3,13 +3,13 @@
 import { useEffect, useState } from 'react';
 import { useWallet } from '@solana/wallet-adapter-react';
 import { useRouter } from 'next/navigation';
-import { supabase } from '@/lib/supabase';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Loader2, ArrowLeft, Zap } from 'lucide-react';
 import Link from 'next/link';
 import { CreateBountyModal } from '@/components/CreateBountyModal';
 import { ViewBountiesModal } from '@/components/ViewBountiesModal';
+import { listBounties, listProjectsByCreator } from '@/lib/appwrite';
 
 interface Project {
   id: string;
@@ -26,12 +26,11 @@ interface ProjectStats {
   totalFundsDistributed: number;
 }
 
-const projectStatsMap = new Map<string, ProjectStats>();
-
 export default function Dashboard() {
   const { connected, publicKey } = useWallet();
   const router = useRouter();
   const [projects, setProjects] = useState<Project[]>([]);
+  const [statsByProject, setStatsByProject] = useState<Record<string, ProjectStats>>({});
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -42,43 +41,40 @@ export default function Dashboard() {
 
     const fetchProjects = async () => {
       try {
-        const { data, error } = await supabase
-          .from('projects')
-          .select('*')
-          .eq('creator_wallet', publicKey.toBase58())
-          .order('created_at', { ascending: false });
+        const [projectRows, bountyRows] = await Promise.all([
+          listProjectsByCreator(publicKey.toBase58()),
+          listBounties(),
+        ]);
 
-        if (error) throw error;
-        
-        // Fetch bounties for fund calculation
-        if (data && data.length > 0) {
-          const projectIds = data.map(p => p.id);
-          const { data: bounties } = await supabase
-            .from('micro_grants')
-            .select('id, project_id, reward_amount, status')
-            .in('project_id', projectIds);
+        const nextStats: Record<string, ProjectStats> = {};
+        projectRows.forEach((project) => {
+          nextStats[project.$id] = {
+            totalBounties: 0,
+            totalFundsRaised: 0,
+            totalFundsDistributed: 0,
+          };
+        });
 
-          // Calculate stats per project
-          if (bounties) {
-            bounties.forEach(bounty => {
-              const current = projectStatsMap.get(bounty.project_id) || {
-                totalBounties: 0,
-                totalFundsRaised: 0,
-                totalFundsDistributed: 0
-              };
-              
-              current.totalBounties += 1;
-              current.totalFundsRaised += bounty.reward_amount || 0;
-              if (bounty.status === 'completed') {
-                current.totalFundsDistributed += bounty.reward_amount || 0;
-              }
-              
-              projectStatsMap.set(bounty.project_id, current);
-            });
+        bountyRows.forEach((bounty) => {
+          const current = nextStats[bounty.project_id];
+          if (!current) return;
+
+          current.totalBounties += 1;
+          current.totalFundsRaised += bounty.reward_amount || 0;
+          if (bounty.status === 'completed') {
+            current.totalFundsDistributed += bounty.reward_amount || 0;
           }
-        }
-        
-        setProjects(data || []);
+        });
+
+        setProjects(projectRows.map((project) => ({
+          id: project.$id,
+          name: project.name,
+          description: project.description,
+          bags_token_mint: project.bags_token_mint || '',
+          creator_wallet: project.creator_wallet,
+          created_at: project.created_at,
+        })));
+        setStatsByProject(nextStats);
       } catch (err) {
         console.error('Error fetching projects:', err);
       } finally {
@@ -122,7 +118,7 @@ export default function Dashboard() {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {projects.map((project) => {
-              const stats = projectStatsMap.get(project.id) || {
+              const stats = statsByProject[project.id] || {
                 totalBounties: 0,
                 totalFundsRaised: 0,
                 totalFundsDistributed: 0

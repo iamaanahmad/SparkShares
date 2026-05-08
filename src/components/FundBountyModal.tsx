@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useWallet, useConnection } from '@solana/wallet-adapter-react';
 import { PublicKey, SystemProgram, Transaction } from '@solana/web3.js';
-import { supabase } from '@/lib/supabase';
+import { createBacking } from '@/lib/appwrite';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -71,22 +71,13 @@ export function FundBountyModal({
       const signature = await sendTransaction(fundTx, connection);
       console.log(`Funding successful! Tx: ${signature}`);
 
-      // 2. Log the backing in supabase (create a backings table entry)
-      const { error: backingErr } = await supabase
-        .from('backings')
-        .insert({
-          grant_id: bountyId,
-          backer_wallet: publicKey.toBase58(),
-          amount_sol: amount,
-          tx_signature: signature,
-        })
-        .select()
-        .single();
-
-      // Ignore error if backings table doesn't exist (we can add it later)
-      if (backingErr && !backingErr.message.includes('does not exist')) {
-        console.warn('Backing log error:', backingErr);
-      }
+      // 2. Record the backing in Appwrite so analytics can show funding activity
+      await createBacking({
+        grant_id: bountyId,
+        backer_wallet: publicKey.toBase58(),
+        amount_sol: amount,
+        tx_signature: signature,
+      });
 
       toast.success('Bounty Funded', {
         description: `Successfully contributed ${amount} SOL to "${bountyTitle}"`

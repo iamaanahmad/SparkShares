@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useWallet, useConnection } from '@solana/wallet-adapter-react';
 import { PublicKey, SystemProgram, Transaction } from '@solana/web3.js';
 import { BagsSDK } from '@bagsfm/bags-sdk';
-import { supabase } from '@/lib/supabase';
+import { createProject } from '@/lib/appwrite';
 import { createBagsTokenMetadata } from '@/app/actions/bags';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
@@ -92,15 +92,13 @@ export function LaunchProjectModal() {
         console.log("Devnet Dummy Token Launched Successfully! Tx:", signature);
       } // CLOSE INNER TRY-CATCH
 
-      // 5. Persist to our Supabase database MVP
-      const { data, error } = await supabase.from('projects').insert({
+      // 5. Persist to Appwrite so the project appears in the dashboard
+      const project = await createProject({
         creator_wallet: publicKey.toBase58(),
         name: formData.name,
         description: formData.description,
         bags_token_mint: bagsTokenMintAddress,
-      }).select().single();
-
-      if (error) throw error;
+      });
       
       setOpen(false);
       toast.success("Project Successfully Launched", {
@@ -108,7 +106,7 @@ export function LaunchProjectModal() {
       });
 
       // Hackathon Speed Mode: Navigate directly to the newly created project's dashboard!
-      router.push(`/dashboard?projectId=${data.id}`);
+      router.push(`/dashboard?projectId=${project.$id}`);
     } catch (err: unknown) {
       console.error(err);
       toast.error("Deployment failed", {

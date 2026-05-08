@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useWallet } from '@solana/wallet-adapter-react';
-import { supabase } from '@/lib/supabase';
+import { createSubmission } from '@/lib/appwrite';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -22,13 +22,11 @@ export function SubmitWorkModal({ bountyId, bountyTitle }: { bountyId: string; b
     setIsLoading(true);
 
     try {
-      const { error } = await supabase.from('submissions').insert({
+      await createSubmission({
         grant_id: bountyId,
         submitter_wallet: publicKey.toBase58(),
         content: proofLink,
       });
-
-      if (error) throw error;
       
       setOpen(false);
       setProofLink('');
