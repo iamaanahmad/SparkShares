@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Loader2, ArrowLeft, TrendingUp, Zap } from 'lucide-react';
+import { Loader2, ArrowLeft, Zap } from 'lucide-react';
 import Link from 'next/link';
 import { CreateBountyModal } from '@/components/CreateBountyModal';
 import { ViewBountiesModal } from '@/components/ViewBountiesModal';

@@ -9,10 +9,6 @@ import Link from 'next/link';
 import { SubmitWorkModal } from '@/components/SubmitWorkModal';
 import { FundBountyModal } from '@/components/FundBountyModal';
 
-interface Project {
-  creator_wallet?: string;
-}
-
 interface Bounty {
   id: string;
   project_id: string;
@@ -48,7 +44,7 @@ export default function BountiesPage() {
           .order('created_at', { ascending: false });
 
         if (error) throw error;
-        setBounties(data as Bounty[] || []);
+        setBounties((data as Bounty[]) || []);
       } catch (err) {
         console.error('Error fetching bounties:', err);
       } finally {
@@ -88,61 +84,61 @@ export default function BountiesPage() {
               const hasSubmitted = publicKey && bounty.submissions?.some(
                 (s) => s.submitter_wallet === publicKey.toBase58()
               );
-              
-              return (
-              <Card key={bounty.id} className="bg-zinc-900 border-zinc-800 text-left hover:border-zinc-700 transition-colors flex flex-col">
-                <CardHeader>
-                  <div className="flex justify-between items-start gap-4">      
-                    <div>
-                      <p className="text-xs text-indigo-400 font-bold uppercase tracking-wider mb-1">
-                        {bounty.projects?.name || 'Unknown Project'}
-                      </p>
-                      <CardTitle className="leading-tight flex items-center gap-3">
-                        {bounty.title}
-                        {isCompleted && (
-                          <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 whitespace-nowrap font-normal uppercase min-w-fit tracking-wider">
-                            Completed
-                          </span>
-                        )}
-                      </CardTitle>
-                    </div>
-                    <div className="flex items-center gap-1 bg-zinc-950 px-3 py-1 rounded-full border border-zinc-800">
-                      <Coins size={14} className="text-emerald-400" />
-                      <span className="font-mono text-emerald-400 font-bold">{bounty.reward_amount}</span>
-                    </div>
-                  </div>
-                </CardHeader>
-                <CardContent className="flex-1 flex flex-col justify-between">
-                  <p className="text-zinc-400 text-sm mb-6 leading-relaxed">
-                    {bounty.description}
-                  </p>
 
-                  <div className="mt-auto">
-                    {isCompleted ? (
-                      <div className="w-full py-2 px-4 rounded-md border border-zinc-800 bg-zinc-800/50 text-zinc-500 flex items-center justify-center font-medium tracking-wide text-sm cursor-not-allowed">
-                        <CheckCircle className="mr-2" size={16} /> Bounty Ended
+              return (
+                <Card key={bounty.id} className="bg-zinc-900 border-zinc-800 text-left hover:border-zinc-700 transition-colors flex flex-col">
+                  <CardHeader>
+                    <div className="flex justify-between items-start gap-4">
+                      <div>
+                        <p className="text-xs text-indigo-400 font-bold uppercase tracking-wider mb-1">
+                          {bounty.projects?.name || 'Unknown Project'}
+                        </p>
+                        <CardTitle className="leading-tight flex items-center gap-3">
+                          {bounty.title}
+                          {isCompleted && (
+                            <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 whitespace-nowrap font-normal uppercase min-w-fit tracking-wider">
+                              Completed
+                            </span>
+                          )}
+                        </CardTitle>
                       </div>
-                    ) : hasSubmitted ? (
-                      <div className="w-full py-2 px-4 rounded-md border border-indigo-500/20 bg-indigo-500/10 text-indigo-400 flex items-center justify-center font-medium tracking-wide text-sm cursor-default">
-                        <Clock className="mr-2" size={16} /> Submitted
+                      <div className="flex items-center gap-1 bg-zinc-950 px-3 py-1 rounded-full border border-zinc-800">
+                        <Coins size={14} className="text-emerald-400" />
+                        <span className="font-mono text-emerald-400 font-bold">{bounty.reward_amount}</span>
                       </div>
-                    ) : (
-                      <div className="flex gap-2 w-full">
-                        <div className="flex-1">
-                          <SubmitWorkModal bountyId={bounty.id} bountyTitle={bounty.title} />
+                    </div>
+                  </CardHeader>
+                  <CardContent className="flex-1 flex flex-col justify-between">
+                    <p className="text-zinc-400 text-sm mb-6 leading-relaxed">
+                      {bounty.description}
+                    </p>
+
+                    <div className="mt-auto">
+                      {isCompleted ? (
+                        <div className="w-full py-2 px-4 rounded-md border border-zinc-800 bg-zinc-800/50 text-zinc-500 flex items-center justify-center font-medium tracking-wide text-sm cursor-not-allowed">
+                          <CheckCircle className="mr-2" size={16} /> Bounty Ended
                         </div>
-                        <FundBountyModal 
-                          bountyId={bounty.id}
-                          bountyTitle={bounty.title}
-                          projectCreatorWallet={bounty.projects?.creator_wallet || ''}
-                          currentFunded={bounty.reward_amount}
-                        />
-                      </div>
-                    )}
-                  </div>
-                </CardContent>
-              </Card>
-            );
+                      ) : hasSubmitted ? (
+                        <div className="w-full py-2 px-4 rounded-md border border-indigo-500/20 bg-indigo-500/10 text-indigo-400 flex items-center justify-center font-medium tracking-wide text-sm cursor-default">
+                          <Clock className="mr-2" size={16} /> Submitted
+                        </div>
+                      ) : (
+                        <div className="flex gap-2 w-full">
+                          <div className="flex-1">
+                            <SubmitWorkModal bountyId={bounty.id} bountyTitle={bounty.title} />
+                          </div>
+                          <FundBountyModal
+                            bountyId={bounty.id}
+                            bountyTitle={bounty.title}
+                            projectCreatorWallet={bounty.projects?.creator_wallet || ''}
+                            currentFunded={bounty.reward_amount}
+                          />
+                        </div>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+              );
             })}
           </div>
         )}

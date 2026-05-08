@@ -107,21 +107,23 @@ export function FundBountyModal({
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button 
-          size="sm" 
-          className="bg-indigo-600 hover:bg-indigo-500 text-white font-bold h-8"
-          variant="outline"
-        >
-          <Coins className="w-3 h-3 mr-2" />
-          Fund
-        </Button>
-      </DialogTrigger>
+      <DialogTrigger
+        render={
+          <Button
+            size="sm"
+            className="bg-indigo-600 hover:bg-indigo-500 text-white font-bold h-8"
+            variant="outline"
+          >
+            <Coins className="w-3 h-3 mr-2" />
+            Fund
+          </Button>
+        }
+      />
       <DialogContent className="sm:max-w-md bg-zinc-950 border-zinc-800 text-zinc-50">
         <DialogHeader>
           <DialogTitle>Fund This Bounty</DialogTitle>
           <DialogDescription className="text-zinc-400">
-            Contribute SOL to increase the reward pool for "{bountyTitle}"
+            Contribute SOL to increase the reward pool for &quot;{bountyTitle}&quot;
           </DialogDescription>
         </DialogHeader>
 

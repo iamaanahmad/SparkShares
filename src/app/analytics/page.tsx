@@ -1,7 +1,6 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useWallet } from '@solana/wallet-adapter-react';
 import { supabase } from '@/lib/supabase';
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from '@/components/ui/card';
 import { Loader2, ArrowLeft, TrendingUp, Users, Zap, Award } from 'lucide-react';
@@ -18,7 +17,6 @@ interface ProjectStats {
 }
 
 export default function AnalyticsPage() {
-  const { publicKey } = useWallet();
   const [stats, setStats] = useState<ProjectStats[]>([]);
   const [loading, setLoading] = useState(true);
   const [globalStats, setGlobalStats] = useState({
@@ -78,7 +76,6 @@ export default function AnalyticsPage() {
 
         // Calculate global stats
         const totalDistributed = projectStats.reduce((sum, p) => sum + p.totalFundsDistributed, 0);
-        const totalRaised = projectStats.reduce((sum, p) => sum + p.totalFundsRaised, 0);
         const totalBounties = projectStats.reduce((sum, p) => sum + p.bountyCount, 0);
         const totalSubmissions = projectStats.reduce((sum, p) => sum + p.submissionCount, 0);
 
