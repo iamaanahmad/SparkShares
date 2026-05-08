@@ -52,7 +52,7 @@ export interface BackingRow {
 function defaultPermissions() {
   return [
     Permission.read(Role.any()),
-    Permission.create(Role.any()),
+    Permission.write(Role.any()),
     Permission.update(Role.any()),
     Permission.delete(Role.any()),
   ];
