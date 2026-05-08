@@ -7,6 +7,11 @@ import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Loader2, ArrowLeft, Coins, CheckCircle, Clock } from 'lucide-react';
 import Link from 'next/link';
 import { SubmitWorkModal } from '@/components/SubmitWorkModal';
+import { FundBountyModal } from '@/components/FundBountyModal';
+
+interface Project {
+  creator_wallet?: string;
+}
 
 interface Bounty {
   id: string;
@@ -18,6 +23,7 @@ interface Bounty {
   created_at: string;
   projects?: {
     name: string;
+    creator_wallet?: string;
   };
   submissions?: {
     submitter_wallet: string;
@@ -36,7 +42,7 @@ export default function BountiesPage() {
           .from('micro_grants')
           .select(`
             *,
-            projects ( name ),
+            projects ( name, creator_wallet ),
             submissions ( submitter_wallet )
           `)
           .order('created_at', { ascending: false });
@@ -121,7 +127,17 @@ export default function BountiesPage() {
                         <Clock className="mr-2" size={16} /> Submitted
                       </div>
                     ) : (
-                      <SubmitWorkModal bountyId={bounty.id} bountyTitle={bounty.title} />
+                      <div className="flex gap-2 w-full">
+                        <div className="flex-1">
+                          <SubmitWorkModal bountyId={bounty.id} bountyTitle={bounty.title} />
+                        </div>
+                        <FundBountyModal 
+                          bountyId={bounty.id}
+                          bountyTitle={bounty.title}
+                          projectCreatorWallet={bounty.projects?.creator_wallet || ''}
+                          currentFunded={bounty.reward_amount}
+                        />
+                      </div>
                     )}
                   </div>
                 </CardContent>

@@ -47,7 +47,7 @@ export default function Home() {
               </p>
             </div>
             
-            <div className="flex flex-col sm:flex-row gap-4 w-full justify-center items-center">
+            <div className="flex flex-col sm:flex-row gap-4 w-full justify-center items-center flex-wrap">
               <Link href="/dashboard" className="w-full sm:w-auto">
                 <Button size="lg" className="w-full sm:w-auto rounded-none font-mono font-bold uppercase tracking-widest bg-transparent border border-cyan-400 text-cyan-400 hover:bg-cyan-400 hover:text-black hover:shadow-[0_0_20px_rgba(34,211,238,0.5)] px-8 transition-all">
                   Dashboard
@@ -59,6 +59,11 @@ export default function Home() {
               <Link href="/bounties" className="w-full sm:w-auto">
                 <Button size="lg" variant="outline" className="w-full sm:w-auto rounded-none font-mono font-bold uppercase tracking-widest bg-transparent border border-fuchsia-500 text-fuchsia-500 hover:bg-fuchsia-500 hover:text-black hover:shadow-[0_0_20px_rgba(217,70,239,0.5)] px-8 transition-all">
                   Explore Bounties
+                </Button>
+              </Link>
+              <Link href="/analytics" className="w-full sm:w-auto">
+                <Button size="lg" className="w-full sm:w-auto rounded-none font-mono font-bold uppercase tracking-widest bg-transparent border border-emerald-500 text-emerald-500 hover:bg-emerald-500 hover:text-black hover:shadow-[0_0_20px_rgba(16,185,129,0.5)] px-8 transition-all">
+                  Analytics
                 </Button>
               </Link>
             </div>

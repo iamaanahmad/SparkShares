@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Loader2, ArrowLeft } from 'lucide-react';
+import { Loader2, ArrowLeft, TrendingUp, Zap } from 'lucide-react';
 import Link from 'next/link';
 import { CreateBountyModal } from '@/components/CreateBountyModal';
 import { ViewBountiesModal } from '@/components/ViewBountiesModal';
@@ -19,6 +19,14 @@ interface Project {
   creator_wallet: string;
   created_at: string;
 }
+
+interface ProjectStats {
+  totalBounties: number;
+  totalFundsRaised: number;
+  totalFundsDistributed: number;
+}
+
+const projectStatsMap = new Map<string, ProjectStats>();
 
 export default function Dashboard() {
   const { connected, publicKey } = useWallet();
@@ -41,6 +49,35 @@ export default function Dashboard() {
           .order('created_at', { ascending: false });
 
         if (error) throw error;
+        
+        // Fetch bounties for fund calculation
+        if (data && data.length > 0) {
+          const projectIds = data.map(p => p.id);
+          const { data: bounties } = await supabase
+            .from('micro_grants')
+            .select('id, project_id, reward_amount, status')
+            .in('project_id', projectIds);
+
+          // Calculate stats per project
+          if (bounties) {
+            bounties.forEach(bounty => {
+              const current = projectStatsMap.get(bounty.project_id) || {
+                totalBounties: 0,
+                totalFundsRaised: 0,
+                totalFundsDistributed: 0
+              };
+              
+              current.totalBounties += 1;
+              current.totalFundsRaised += bounty.reward_amount || 0;
+              if (bounty.status === 'completed') {
+                current.totalFundsDistributed += bounty.reward_amount || 0;
+              }
+              
+              projectStatsMap.set(bounty.project_id, current);
+            });
+          }
+        }
+        
         setProjects(data || []);
       } catch (err) {
         console.error('Error fetching projects:', err);
@@ -84,20 +121,45 @@ export default function Dashboard() {
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {projects.map((project) => (
-              <Card key={project.id} className="bg-zinc-900 border-zinc-800 text-left hover:border-zinc-700 transition-colors">
+            {projects.map((project) => {
+              const stats = projectStatsMap.get(project.id) || {
+                totalBounties: 0,
+                totalFundsRaised: 0,
+                totalFundsDistributed: 0
+              };
+
+              return (
+              <Card key={project.id} className="bg-zinc-900 border-zinc-800 text-left hover:border-zinc-700 transition-colors flex flex-col">
                 <CardHeader>
                   <CardTitle className="truncate" title={project.name}>{project.name}</CardTitle>
                   <CardDescription className="text-zinc-400 truncate" title={project.description}>
                     {project.description}
                   </CardDescription>
                 </CardHeader>
-                <CardContent className="space-y-4">
+                <CardContent className="space-y-4 flex-1 flex flex-col">
                   <div className="text-xs bg-zinc-950 p-2 rounded-md border border-zinc-800 break-all font-mono text-zinc-500">
                     Bags Mint: {project.bags_token_mint || 'Pending...'}
                   </div>
+
+                  {/* Fund Tracking Stats */}
+                  <div className="grid grid-cols-2 gap-2 pt-2">
+                    <div className="p-3 bg-zinc-950 rounded-md border border-zinc-800">
+                      <p className="text-xs text-zinc-500 uppercase tracking-wider mb-1">Bounties</p>
+                      <p className="text-lg font-bold text-cyan-400 flex items-center gap-1">
+                        <Zap size={14} /> {stats.totalBounties}
+                      </p>
+                    </div>
+                    <div className="p-3 bg-zinc-950 rounded-md border border-zinc-800">
+                      <p className="text-xs text-zinc-500 uppercase tracking-wider mb-1">Raised</p>
+                      <p className="text-lg font-bold text-fuchsia-400">{stats.totalFundsRaised.toFixed(1)} SOL</p>
+                    </div>
+                    <div className="p-3 bg-zinc-950 rounded-md border border-zinc-800 col-span-2">
+                      <p className="text-xs text-zinc-500 uppercase tracking-wider mb-1">Distributed</p>
+                      <p className="text-lg font-bold text-emerald-400">{stats.totalFundsDistributed.toFixed(1)} SOL</p>
+                    </div>
+                  </div>
                   
-                  <div className="pt-2 flex flex-col sm:flex-row w-full gap-3">
+                  <div className="pt-2 flex flex-col sm:flex-row w-full gap-3 mt-auto">
                     <div className="flex-1">
                       <CreateBountyModal projectId={project.id} projectName={project.name} />
                     </div>
@@ -107,7 +169,8 @@ export default function Dashboard() {
                   </div>
                 </CardContent>
               </Card>
-            ))}
+              );
+            })}
           </div>
         )}
       </section>
