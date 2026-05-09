@@ -9,7 +9,7 @@ import { Loader2, ArrowLeft, Zap } from 'lucide-react';
 import Link from 'next/link';
 import { CreateBountyModal } from '@/components/CreateBountyModal';
 import { ViewBountiesModal } from '@/components/ViewBountiesModal';
-import { listBounties, ProjectRow } from '@/lib/appwrite';
+import { ProjectRow } from '@/lib/appwrite';
 
 interface Project {
   id: string;
@@ -30,6 +30,16 @@ interface ProjectsByCreatorResponse {
   rows?: ProjectRow[];
 }
 
+interface BountyRow {
+  project_id: string;
+  reward_amount?: number;
+  status?: 'open' | 'completed' | string;
+}
+
+interface BountiesResponse {
+  rows?: BountyRow[];
+}
+
 export default function Dashboard() {
   const { connected, publicKey } = useWallet();
   const router = useRouter();
@@ -47,11 +57,13 @@ export default function Dashboard() {
       try {
         const [projectRes, bountyRows] = await Promise.all([
           fetch(`/api/projects-by-creator?creator_wallet=${publicKey.toBase58()}`),
-          listBounties(),
+          fetch('/api/bounties'),
         ]);
         
         const projectData = (await projectRes.json()) as ProjectsByCreatorResponse;
         const projectRows: ProjectRow[] = projectData.rows || [];
+        const bountyData = (await bountyRows.json()) as BountiesResponse;
+        const bountyItems = bountyData.rows || [];
 
         const nextStats: Record<string, ProjectStats> = {};
         projectRows.forEach((project) => {
@@ -62,7 +74,7 @@ export default function Dashboard() {
           };
         });
 
-        bountyRows.forEach((bounty) => {
+        bountyItems.forEach((bounty) => {
           const current = nextStats[bounty.project_id];
           if (!current) return;
 

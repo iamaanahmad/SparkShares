@@ -21,12 +21,11 @@ export async function GET(req: NextRequest) {
   try {
     // Call Appwrite directly from server (no CORS issues, uses API key)
     const response = await fetch(
-      `${APPWRITE_ENDPOINT}/databases/${APPWRITE_DATABASE_ID}/tables/projects/rows`,
+      `${APPWRITE_ENDPOINT}/tablesdb/${APPWRITE_DATABASE_ID}/tables/projects/rows`,
       {
         method: 'GET',
         headers: {
           'X-Appwrite-Project': APPWRITE_PROJECT_ID,
-          'X-Appwrite-Key': process.env.APPWRITE_API_KEY || '',
           'Content-Type': 'application/json',
         },
       }
