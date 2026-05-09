@@ -1,6 +1,15 @@
 import { APPWRITE_ENDPOINT, APPWRITE_PROJECT_ID, APPWRITE_DATABASE_ID } from '@/lib/appwrite';
 import { NextRequest, NextResponse } from 'next/server';
 
+interface AppwriteProjectRow {
+  creator_wallet: string;
+  [key: string]: unknown;
+}
+
+interface AppwriteProjectsResponse {
+  rows: AppwriteProjectRow[];
+}
+
 export async function GET(req: NextRequest) {
   const searchParams = req.nextUrl.searchParams;
   const creatorWallet = searchParams.get('creator_wallet');
@@ -27,10 +36,10 @@ export async function GET(req: NextRequest) {
       throw new Error(`Appwrite error: ${response.status}`);
     }
 
-    const data = (await response.json()) as any;
+    const data = (await response.json()) as AppwriteProjectsResponse;
     
     // Filter rows client-side by creator_wallet
-    const filteredRows = data.rows.filter((row: any) => row.creator_wallet === creatorWallet);
+    const filteredRows = data.rows.filter((row) => row.creator_wallet === creatorWallet);
 
     return NextResponse.json({ rows: filteredRows });
   } catch (error) {

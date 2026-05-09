@@ -9,7 +9,7 @@ import { Loader2, ArrowLeft, Zap } from 'lucide-react';
 import Link from 'next/link';
 import { CreateBountyModal } from '@/components/CreateBountyModal';
 import { ViewBountiesModal } from '@/components/ViewBountiesModal';
-import { listBounties, listProjectsByCreator } from '@/lib/appwrite';
+import { listBounties, ProjectRow } from '@/lib/appwrite';
 
 interface Project {
   id: string;
@@ -24,6 +24,10 @@ interface ProjectStats {
   totalBounties: number;
   totalFundsRaised: number;
   totalFundsDistributed: number;
+}
+
+interface ProjectsByCreatorResponse {
+  rows?: ProjectRow[];
 }
 
 export default function Dashboard() {
@@ -46,8 +50,8 @@ export default function Dashboard() {
           listBounties(),
         ]);
         
-        const projectData = await projectRes.json();
-        const projectRows = projectData.rows || [];
+        const projectData = (await projectRes.json()) as ProjectsByCreatorResponse;
+        const projectRows: ProjectRow[] = projectData.rows || [];
 
         const nextStats: Record<string, ProjectStats> = {};
         projectRows.forEach((project) => {
