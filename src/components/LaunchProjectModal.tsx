@@ -4,9 +4,8 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useWallet, useConnection } from '@solana/wallet-adapter-react';
 import { PublicKey, SystemProgram, Transaction } from '@solana/web3.js';
-import { BagsSDK } from '@bagsfm/bags-sdk';
 import { createProject } from '@/lib/appwrite';
-import { createBagsTokenMetadata } from '@/app/actions/bags';
+import { createBagsTokenMetadata, createBagsLaunchTransaction } from '@/app/actions/bags';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
@@ -33,88 +32,83 @@ export function LaunchProjectModal() {
 
     try {
       // 1. Initialize Bags SDK
-      // Using a fallback API key if not provided in the environment.
-      // Make sure to add NEXT_PUBLIC_BAGS_API_KEY to your .env.local!
-      const bagsClient = new BagsSDK(
-        process.env.NEXT_PUBLIC_BAGS_API_KEY || 'demo-api-key',
-        connection
+    try {
+      // 1. Submit the Token Info & Metadata to Bags (server-side)
+      const tokenInfoResponse = await createBagsTokenMetadata(
+        formData.name,
+        formData.name.substring(0, 4).toUpperCase(),
+        formData.description
       );
 
-      // 2. Submit the Token Info & Metadata to Bags
-      // We run this metadata step in a Server Action because it uses Node.js 'formData' APIs.      
-      try {
-        const tokenInfoResponse = await createBagsTokenMetadata(
-          formData.name,
-          formData.name.substring(0, 4).toUpperCase(),
-          formData.description
-        );
+      // 2. Create the actual Launch Transaction using the retrieved metadata URL (server-side to avoid CORS)
+      const launchTx = await createBagsLaunchTransaction(
+        tokenInfoResponse.tokenMetadata,
+        tokenInfoResponse.tokenMint,
+        publicKey.toBase58(),
+        100_000_000,
+        tokenInfoResponse.tokenMint
+      );
 
-        // 3. Create the actual Launch Transaction using the retrieved metadata URL
-        const launchTx = await bagsClient.tokenLaunch.createLaunchTransaction({ 
-          metadataUrl: tokenInfoResponse.tokenMetadata,
-          tokenMint: new PublicKey(tokenInfoResponse.tokenMint),
-          launchWallet: publicKey,
-          initialBuyLamports: 100_000_000, 
-          configKey: new PublicKey(tokenInfoResponse.tokenMint), 
-        });
+      // 3. Prompt the user's wallet to sign & pay for the Launch
+      console.log("Requesting Wallet Signature to deploy Token on Solana...");
+      const signature = await sendTransaction(launchTx, connection);
+      console.log("Token Launched Successfully! Tx:", signature);
 
-        // 4. Prompt the user's wallet to sign & pay for the Launch
-        console.log("Requesting Wallet Signature to deploy Token on Solana...");
-        const signature = await sendTransaction(launchTx, connection);
-        console.log("Token Launched Successfully! Tx:", signature);
+      // Map the minted Token address to our variable
+      bagsTokenMintAddress = tokenInfoResponse.tokenMint;
+    } catch (sdkError: unknown) {
+      console.warn("Bags API Server Action returned Error:", sdkError);
+      console.log("NOTE: Bags API token-launch endpoints usually require Solana Mainnet since Meteora Dynamic Bonding Curves only exist on mainnet.");
+      
+      // HACKATHON FALLBACK: Manually pop up Phantom Wallet to prove the Web3 connection UX works!
+      // We will create a dummy 0.01 SOL "Launch Fee" devnet transaction to the Bags Creation Authority
+      const dummyLaunchTx = new Transaction().add(
+        SystemProgram.transfer({
+          fromPubkey: publicKey,
+          toPubkey: new PublicKey("BAGSB9TpGrZxQbEsrEznv5jXXdwyP6AXerN8aVRiAmcv"),
+          lamports: 10_000_000, // 0.01 SOL
+        })
+      );
+      const { blockhash } = await connection.getLatestBlockhash();
+      dummyLaunchTx.recentBlockhash = blockhash;
+      dummyLaunchTx.feePayer = publicKey;
 
-        // Map the minted Token address to our variable
-        bagsTokenMintAddress = tokenInfoResponse.tokenMint;
-      } catch (sdkError: unknown) {
-        console.warn("Bags API SDK returned Error:", sdkError);
-        console.log("NOTE: Bags API token-launch endpoints usually require Solana Mainnet since Meteora Dynamic Bonding Curves only exist on mainnet.");
-        
-        // HACKATHON FALLBACK: Manually pop up Phantom Wallet to prove the Web3 connection UX works!
-        // We will create a dummy 0.01 SOL "Launch Fee" devnet transaction to the Bags Creation Authority
-        const dummyLaunchTx = new Transaction().add(
-          SystemProgram.transfer({
-            fromPubkey: publicKey,
-            toPubkey: new PublicKey("BAGSB9TpGrZxQbEsrEznv5jXXdwyP6AXerN8aVRiAmcv"),
-            lamports: 10_000_000, // 0.01 SOL
-          })
-        );
-        const { blockhash } = await connection.getLatestBlockhash();
-        dummyLaunchTx.recentBlockhash = blockhash;
-        dummyLaunchTx.feePayer = publicKey;
-
-        toast.info("Devnet Fallback Active", {
-          description: "Bags SDK requires Mainnet for token-launch points. We are falling back to a Devnet dummy transaction for the Hackathon.",
-          duration: 6000,
-        });
-        
-        console.log("Requesting Devnet fallback Wallet Signature...");
-        const signature = await sendTransaction(dummyLaunchTx, connection);
-        console.log("Devnet Dummy Token Launched Successfully! Tx:", signature);
-      } // CLOSE INNER TRY-CATCH
-
-      // 5. Persist to Appwrite so the project appears in the dashboard
-      const project = await createProject({
-        creator_wallet: publicKey.toBase58(),
-        name: formData.name,
-        description: formData.description,
-        bags_token_mint: bagsTokenMintAddress,
+      toast.info("Devnet Fallback Active", {
+        description: "Bags SDK requires Mainnet for token-launch points. We are falling back to a Devnet dummy transaction for the Hackathon.",
+        duration: 6000,
       });
       
-      setOpen(false);
-      toast.success("Project Successfully Launched", {
-        description: `Your token uses the DEVNET mock address ${bagsTokenMintAddress}`
-      });
+      console.log("Requesting Devnet fallback Wallet Signature...");
+      const signature = await sendTransaction(dummyLaunchTx, connection);
+      console.log("Devnet Dummy Token Launched Successfully! Tx:", signature);
 
-      // Hackathon Speed Mode: Navigate directly to the newly created project's dashboard!
-      router.push(`/dashboard?projectId=${project.$id}`);
-    } catch (err: unknown) {
-      console.error(err);
-      toast.error("Deployment failed", {
-        description: err instanceof Error ? err.message : String(err)
-      });
-    } finally {
-      setIsLoading(false);
+      // Use the dummy transaction for the fallback
+      bagsTokenMintAddress = "MockTokenMintAddress_Devnet" + Date.now();
     }
+
+    // 5. Persist to Appwrite so the project appears in the dashboard
+    const project = await createProject({
+      creator_wallet: publicKey.toBase58(),
+      name: formData.name,
+      description: formData.description,
+      bags_token_mint: bagsTokenMintAddress,
+    });
+    
+    setOpen(false);
+    toast.success("Project Successfully Launched", {
+      description: `Your token uses the DEVNET mock address ${bagsTokenMintAddress}`
+    });
+
+    // Hackathon Speed Mode: Navigate directly to the newly created project's dashboard!
+    router.push(`/dashboard?projectId=${project.$id}`);
+  } catch (err: unknown) {
+    console.error(err);
+    toast.error("Deployment failed", {
+      description: err instanceof Error ? err.message : String(err)
+    });
+  } finally {
+    setIsLoading(false);
+  }
   };
 
   return (

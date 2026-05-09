@@ -41,10 +41,13 @@ export default function Dashboard() {
 
     const fetchProjects = async () => {
       try {
-        const [projectRows, bountyRows] = await Promise.all([
-          listProjectsByCreator(publicKey.toBase58()),
+        const [projectRes, bountyRows] = await Promise.all([
+          fetch(`/api/projects-by-creator?creator_wallet=${publicKey.toBase58()}`),
           listBounties(),
         ]);
+        
+        const projectData = await projectRes.json();
+        const projectRows = projectData.rows || [];
 
         const nextStats: Record<string, ProjectStats> = {};
         projectRows.forEach((project) => {
