@@ -2,6 +2,7 @@
 
 import { BagsSDK } from '@bagsfm/bags-sdk';
 import { Connection, PublicKey } from '@solana/web3.js';
+import { APPWRITE_ENDPOINT, APPWRITE_PROJECT_ID, APPWRITE_DATABASE_ID } from '@/lib/appwrite';
 
 export async function createBagsTokenMetadata(name: string, symbol: string, description: string) {
   // Always perform this on the server where Node JS form-data is available
@@ -44,4 +45,50 @@ export async function createBagsLaunchTransaction(
   });
 
   return launchTx;
+}
+
+export async function updateBountyReward(bountyId: string, additionalAmount: number) {
+  // Server-side update to Appwrite to increase bounty reward amount
+  try {
+    // First fetch the current bounty to get its current reward_amount
+    const getResponse = await fetch(
+      `${APPWRITE_ENDPOINT}/tablesdb/${APPWRITE_DATABASE_ID}/tables/micro_grants/rows/${bountyId}`,
+      {
+        method: 'GET',
+        headers: {
+          'X-Appwrite-Project': APPWRITE_PROJECT_ID,
+          'Content-Type': 'application/json',
+        },
+      }
+    );
+
+    if (!getResponse.ok) {
+      throw new Error(`Failed to fetch bounty: ${getResponse.status}`);
+    }
+
+    const currentBounty = (await getResponse.json()) as { reward_amount: number; [key: string]: unknown };
+    const newRewardAmount = (currentBounty.reward_amount || 0) + additionalAmount;
+
+    // Then update it with the new amount
+    const updateResponse = await fetch(
+      `${APPWRITE_ENDPOINT}/tablesdb/${APPWRITE_DATABASE_ID}/tables/micro_grants/rows/${bountyId}`,
+      {
+        method: 'PATCH',
+        headers: {
+          'X-Appwrite-Project': APPWRITE_PROJECT_ID,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ reward_amount: newRewardAmount }),
+      }
+    );
+
+    if (!updateResponse.ok) {
+      throw new Error(`Failed to update bounty: ${updateResponse.status}`);
+    }
+
+    return { success: true, newRewardAmount };
+  } catch (error) {
+    console.error('Error updating bounty reward:', error);
+    throw error;
+  }
 }

@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useWallet, useConnection } from '@solana/wallet-adapter-react';
 import { PublicKey, SystemProgram, Transaction } from '@solana/web3.js';
 import { createBacking } from '@/lib/appwrite';
+import { updateBountyReward } from '@/app/actions/bags';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -78,6 +79,9 @@ export function FundBountyModal({
         amount_sol: amount,
         tx_signature: signature,
       });
+
+      // 3. Update the bounty reward_amount to reflect the funding
+      await updateBountyReward(bountyId, amount);
 
       toast.success('Bounty Funded', {
         description: `Successfully contributed ${amount} SOL to "${bountyTitle}"`

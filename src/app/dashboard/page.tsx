@@ -5,7 +5,7 @@ import { useWallet } from '@solana/wallet-adapter-react';
 import { useRouter } from 'next/navigation';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Loader2, ArrowLeft, Zap } from 'lucide-react';
+import { Loader2, ArrowLeft, Zap, TrendingUp, Users, Award } from 'lucide-react';
 import Link from 'next/link';
 import { CreateBountyModal } from '@/components/CreateBountyModal';
 import { ViewBountiesModal } from '@/components/ViewBountiesModal';
@@ -40,11 +40,33 @@ interface BountiesResponse {
   rows?: BountyRow[];
 }
 
+interface SubmissionRow {
+  $id: string;
+  grant_id: string;
+}
+
+interface SubmissionsResponse {
+  rows?: SubmissionRow[];
+}
+
+interface GlobalStats {
+  totalBounties: number;
+  totalSubmissions: number;
+  totalDistributed: number;
+  activeProjects: number;
+}
+
 export default function Dashboard() {
   const { connected, publicKey } = useWallet();
   const router = useRouter();
   const [projects, setProjects] = useState<Project[]>([]);
   const [statsByProject, setStatsByProject] = useState<Record<string, ProjectStats>>({});
+  const [globalStats, setGlobalStats] = useState<GlobalStats>({
+    totalBounties: 0,
+    totalSubmissions: 0,
+    totalDistributed: 0,
+    activeProjects: 0,
+  });
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -55,16 +77,20 @@ export default function Dashboard() {
 
     const fetchProjects = async () => {
       try {
-        const [projectRes, bountyRows] = await Promise.all([
+        const [projectRes, bountyRes, submissionRes] = await Promise.all([
           fetch(`/api/projects-by-creator?creator_wallet=${publicKey.toBase58()}`),
           fetch('/api/bounties'),
+          fetch('/api/submissions'),
         ]);
         
         const projectData = (await projectRes.json()) as ProjectsByCreatorResponse;
         const projectRows: ProjectRow[] = projectData.rows || [];
-        const bountyData = (await bountyRows.json()) as BountiesResponse;
+        const bountyData = (await bountyRes.json()) as BountiesResponse;
         const bountyItems = bountyData.rows || [];
+        const submissionData = (await submissionRes.json()) as SubmissionsResponse;
+        const submissionItems = submissionData.rows || [];
 
+        // Calculate per-project stats
         const nextStats: Record<string, ProjectStats> = {};
         projectRows.forEach((project) => {
           nextStats[project.$id] = {
@@ -83,6 +109,18 @@ export default function Dashboard() {
           if (bounty.status === 'completed') {
             current.totalFundsDistributed += bounty.reward_amount || 0;
           }
+        });
+
+        // Calculate global stats
+        const totalDistributed = bountyItems
+          .filter((b) => b.status === 'completed')
+          .reduce((sum, b) => sum + (b.reward_amount || 0), 0);
+
+        setGlobalStats({
+          activeProjects: projectRows.length,
+          totalBounties: bountyItems.length,
+          totalSubmissions: submissionItems.length,
+          totalDistributed,
         });
 
         setProjects(projectRows.map((project) => ({
@@ -119,6 +157,64 @@ export default function Dashboard() {
 
       <header className="w-full max-w-5xl mb-12">
         <h1 className="text-4xl font-extrabold tracking-tight mb-2">My Projects</h1>
+        <p className="text-zinc-400">Manage your tokenized projects and micro-grants.</p>
+      </header>
+
+      {/* Global Analytics Cards */}
+      <section className="w-full max-w-5xl mb-12">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <Card className="bg-zinc-900 border-zinc-800">
+            <CardContent className="pt-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-zinc-400 text-sm font-medium">Active Projects</p>
+                  <p className="text-3xl font-bold text-cyan-400 mt-2">{globalStats.activeProjects}</p>
+                </div>
+                <TrendingUp className="text-cyan-400 opacity-50" size={32} />
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-zinc-900 border-zinc-800">
+            <CardContent className="pt-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-zinc-400 text-sm font-medium">Open Bounties</p>
+                  <p className="text-3xl font-bold text-fuchsia-400 mt-2">{globalStats.totalBounties}</p>
+                </div>
+                <Zap className="text-fuchsia-400 opacity-50" size={32} />
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-zinc-900 border-zinc-800">
+            <CardContent className="pt-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-zinc-400 text-sm font-medium">Submissions</p>
+                  <p className="text-3xl font-bold text-indigo-400 mt-2">{globalStats.totalSubmissions}</p>
+                </div>
+                <Users className="text-indigo-400 opacity-50" size={32} />
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-zinc-900 border-zinc-800">
+            <CardContent className="pt-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-zinc-400 text-sm font-medium">SOL Distributed</p>
+                  <p className="text-3xl font-bold text-emerald-400 mt-2">{globalStats.totalDistributed.toFixed(2)}</p>
+                </div>
+                <Award className="text-emerald-400 opacity-50" size={32} />
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </section>
+
+      <header className="w-full max-w-5xl mb-12">
+        <h1 className="text-2xl font-extrabold tracking-tight mb-2">My Projects</h1>
         <p className="text-zinc-400">Manage your tokenized projects and micro-grants.</p>
       </header>
 
