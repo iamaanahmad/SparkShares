@@ -4,24 +4,83 @@ import { BagsSDK } from '@bagsfm/bags-sdk';
 import { Connection, PublicKey } from '@solana/web3.js';
 import { APPWRITE_ENDPOINT, APPWRITE_PROJECT_ID, APPWRITE_DATABASE_ID } from '@/lib/appwrite';
 
-export async function createBagsTokenMetadata(name: string, symbol: string, description: string) {
-  // Always perform this on the server where Node JS form-data is available
-  const connection = new Connection("https://api.devnet.solana.com");
-  const bagsClient = new BagsSDK(
-    process.env.NEXT_PUBLIC_BAGS_API_KEY || 'demo-api-key',
-    connection
-  );
+const BAGS_API_KEY = process.env.NEXT_PUBLIC_BAGS_API_KEY || 'demo-api-key';
+const SOLANA_RPC_URL = process.env.SOLANA_RPC_URL || 'https://api.mainnet-beta.solana.com';
 
-  const tokenInfoResponse = await bagsClient.tokenLaunch.createTokenInfoAndMetadata({
+function getBagsSDK() {
+  const connection = new Connection(SOLANA_RPC_URL);
+  return new BagsSDK(BAGS_API_KEY, connection);
+}
+
+/**
+ * Step 1: Create token metadata on Bags (name, symbol, description, image, socials)
+ */
+export async function createBagsTokenMetadata(
+  name: string,
+  symbol: string,
+  description: string,
+  imageUrl?: string,
+  twitterUrl?: string,
+  websiteUrl?: string
+) {
+  const sdk = getBagsSDK();
+
+  const tokenInfoResponse = await sdk.tokenLaunch.createTokenInfoAndMetadata({
     name,
-    symbol,
+    symbol: symbol.toUpperCase().replace('$', ''),
     description,
-    imageUrl: 'https://bags.fm/logo.png', // Or update with a real image link
+    imageUrl: imageUrl || 'https://spark-shares.vercel.app/logo.png',
+    twitter: twitterUrl,
+    website: websiteUrl || 'https://spark-shares.vercel.app',
   });
 
   return tokenInfoResponse;
 }
 
+/**
+ * Step 2: Create fee share configuration using Bags V2 fee-sharing
+ * This sets up how trading fees are split between creator and collaborators.
+ * 
+ * feeClaimers: Array of { user: PublicKey (wallet), userBps: number } 
+ *   - Total BPS must equal 10000 (100%)
+ *   - Creator should always be included explicitly
+ */
+export async function createBagsFeeShareConfig(
+  tokenMintAddress: string,
+  creatorWalletAddress: string,
+  creatorBps: number = 10000
+) {
+  const sdk = getBagsSDK();
+  const tokenMint = new PublicKey(tokenMintAddress);
+  const creatorWallet = new PublicKey(creatorWalletAddress);
+
+  // Default: Creator gets 100% of fees (can be customized)
+  const feeClaimers = [
+    { user: creatorWallet, userBps: creatorBps },
+  ];
+
+  try {
+    const configResult = await sdk.config.createBagsFeeShareConfig({
+      payer: creatorWallet,
+      baseMint: tokenMint,
+      feeClaimers,
+    });
+
+    return {
+      configKey: configResult.meteoraConfigKey.toBase58(),
+      transactions: configResult.transactions,
+      bundles: configResult.bundles,
+    };
+  } catch (error) {
+    console.warn('Fee share config creation failed (may require mainnet):', error);
+    // Return null to indicate fallback needed
+    return null;
+  }
+}
+
+/**
+ * Step 3: Create the launch transaction using Bags SDK
+ */
 export async function createBagsLaunchTransaction(
   metadataUrl: string,
   tokenMintAddress: string,
@@ -29,14 +88,9 @@ export async function createBagsLaunchTransaction(
   initialBuyLamports: number,
   configKeyAddress: string
 ) {
-  // Server-side SDK call avoids CORS issues
-  const connection = new Connection("https://api.devnet.solana.com");
-  const bagsClient = new BagsSDK(
-    process.env.NEXT_PUBLIC_BAGS_API_KEY || 'demo-api-key',
-    connection
-  );
+  const sdk = getBagsSDK();
 
-  const launchTx = await bagsClient.tokenLaunch.createLaunchTransaction({
+  const launchTx = await sdk.tokenLaunch.createLaunchTransaction({
     metadataUrl,
     tokenMint: new PublicKey(tokenMintAddress),
     launchWallet: new PublicKey(launchWalletAddress),
@@ -47,8 +101,10 @@ export async function createBagsLaunchTransaction(
   return launchTx;
 }
 
+/**
+ * Server-side helper to update bounty reward amount in Appwrite
+ */
 export async function updateBountyReward(bountyId: string, additionalAmount: number) {
-  // Server-side update to Appwrite to increase bounty reward amount
   try {
     // First fetch the current bounty to get its current reward_amount
     const getResponse = await fetch(

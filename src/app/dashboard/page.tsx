@@ -5,7 +5,7 @@ import { useWallet } from '@solana/wallet-adapter-react';
 import { useRouter } from 'next/navigation';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Loader2, ArrowLeft, Zap, TrendingUp, Users, Award } from 'lucide-react';
+import { Loader2, ArrowLeft, Zap, TrendingUp, Users, Award, Shield } from 'lucide-react';
 import Link from 'next/link';
 import { CreateBountyModal } from '@/components/CreateBountyModal';
 import { ViewBountiesModal } from '@/components/ViewBountiesModal';
@@ -17,6 +17,8 @@ interface Project {
   description: string;
   bags_token_mint: string;
   creator_wallet: string;
+  fee_sharing_enabled: boolean;
+  fee_share_bps: number;
   created_at: string;
 }
 
@@ -82,7 +84,7 @@ export default function Dashboard() {
           fetch('/api/bounties'),
           fetch('/api/submissions'),
         ]);
-        
+
         const projectData = (await projectRes.json()) as ProjectsByCreatorResponse;
         const projectRows: ProjectRow[] = projectData.rows || [];
         const bountyData = (await bountyRes.json()) as BountiesResponse;
@@ -129,6 +131,8 @@ export default function Dashboard() {
           description: project.description,
           bags_token_mint: project.bags_token_mint || '',
           creator_wallet: project.creator_wallet,
+          fee_sharing_enabled: project.fee_sharing_enabled ?? false,
+          fee_share_bps: project.fee_share_bps ?? 10000,
           created_at: project.created_at,
         })));
         setStatsByProject(nextStats);
@@ -145,89 +149,58 @@ export default function Dashboard() {
   if (!connected) return null;
 
   return (
-    <main className="flex min-h-screen flex-col items-center p-12 bg-zinc-950 text-zinc-50">
-      <div className="w-full max-w-5xl mb-8 flex items-center justify-between">
+    <main className="flex min-h-screen flex-col items-center p-6 md:p-12 bg-zinc-950 text-zinc-50 relative">
+      <div className="fixed inset-0 mesh-gradient pointer-events-none" />
+      <div className="fixed inset-0 grid-pattern pointer-events-none" />
+
+      <div className="relative z-10 w-full max-w-5xl mb-8 flex items-center justify-between">
         <Link href="/" className="text-zinc-400 hover:text-zinc-50 flex items-center gap-2 transition-colors">
           <ArrowLeft size={16} /> Back to Home
         </Link>
-        <p className="text-sm text-zinc-500">
-          Dashboard: {publicKey?.toBase58().slice(0, 4)}...{publicKey?.toBase58().slice(-4)}
+        <p className="text-sm text-zinc-500 font-mono">
+          {publicKey?.toBase58().slice(0, 4)}...{publicKey?.toBase58().slice(-4)}
         </p>
       </div>
 
-      <header className="w-full max-w-5xl mb-12">
-        <h1 className="text-4xl font-extrabold tracking-tight mb-2">My Projects</h1>
+      <header className="relative z-10 w-full max-w-5xl mb-12">
+        <h1 className="text-4xl font-black tracking-tight mb-2">My Projects</h1>
         <p className="text-zinc-400">Manage your tokenized projects and micro-grants.</p>
       </header>
 
       {/* Global Analytics Cards */}
-      <section className="w-full max-w-5xl mb-12">
+      <section className="relative z-10 w-full max-w-5xl mb-12">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          <Card className="bg-zinc-900 border-zinc-800">
-            <CardContent className="pt-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-zinc-400 text-sm font-medium">Active Projects</p>
-                  <p className="text-3xl font-bold text-cyan-400 mt-2">{globalStats.activeProjects}</p>
+          {[
+            { label: 'Active Projects', value: globalStats.activeProjects, icon: TrendingUp, color: 'cyan' },
+            { label: 'Open Bounties', value: globalStats.totalBounties, icon: Zap, color: 'fuchsia' },
+            { label: 'Submissions', value: globalStats.totalSubmissions, icon: Users, color: 'indigo' },
+            { label: 'SOL Distributed', value: globalStats.totalDistributed.toFixed(2), icon: Award, color: 'emerald' },
+          ].map((stat) => (
+            <Card key={stat.label} className="bg-zinc-900/60 border-zinc-800 rounded-2xl backdrop-blur-sm">
+              <CardContent className="pt-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-zinc-400 text-sm font-medium">{stat.label}</p>
+                    <p className={`text-3xl font-bold text-${stat.color}-400 mt-2`}>{stat.value}</p>
+                  </div>
+                  <stat.icon className={`text-${stat.color}-400 opacity-50`} size={32} />
                 </div>
-                <TrendingUp className="text-cyan-400 opacity-50" size={32} />
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="bg-zinc-900 border-zinc-800">
-            <CardContent className="pt-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-zinc-400 text-sm font-medium">Open Bounties</p>
-                  <p className="text-3xl font-bold text-fuchsia-400 mt-2">{globalStats.totalBounties}</p>
-                </div>
-                <Zap className="text-fuchsia-400 opacity-50" size={32} />
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="bg-zinc-900 border-zinc-800">
-            <CardContent className="pt-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-zinc-400 text-sm font-medium">Submissions</p>
-                  <p className="text-3xl font-bold text-indigo-400 mt-2">{globalStats.totalSubmissions}</p>
-                </div>
-                <Users className="text-indigo-400 opacity-50" size={32} />
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="bg-zinc-900 border-zinc-800">
-            <CardContent className="pt-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-zinc-400 text-sm font-medium">SOL Distributed</p>
-                  <p className="text-3xl font-bold text-emerald-400 mt-2">{globalStats.totalDistributed.toFixed(2)}</p>
-                </div>
-                <Award className="text-emerald-400 opacity-50" size={32} />
-              </div>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
+          ))}
         </div>
       </section>
 
-      <header className="w-full max-w-5xl mb-12">
-        <h1 className="text-2xl font-extrabold tracking-tight mb-2">My Projects</h1>
-        <p className="text-zinc-400">Manage your tokenized projects and micro-grants.</p>
-      </header>
-
-      <section className="w-full max-w-5xl">
+      <section className="relative z-10 w-full max-w-5xl">
         {loading ? (
           <div className="flex items-center justify-center p-20">
             <Loader2 className="animate-spin text-zinc-500" size={48} />
           </div>
         ) : projects.length === 0 ? (
-          <div className="p-16 border border-zinc-800 bg-zinc-900/50 rounded-xl text-center">
+          <div className="p-16 glass rounded-2xl text-center neon-border-cyan">
             <p className="text-zinc-400 font-medium mb-4">No projects launched yet.</p>
             <Link href="/">
-              <Button>Launch Your First Project</Button>
+              <Button className="rounded-xl">Launch Your First Project</Button>
             </Link>
           </div>
         ) : (
@@ -240,36 +213,44 @@ export default function Dashboard() {
               };
 
               return (
-              <Card key={project.id} className="bg-zinc-900 border-zinc-800 text-left hover:border-zinc-700 transition-colors flex flex-col">
+              <Card key={project.id} className="bg-zinc-900/60 border-zinc-800 text-left hover:border-zinc-700 transition-all duration-300 flex flex-col rounded-2xl backdrop-blur-sm">
                 <CardHeader>
-                  <CardTitle className="truncate" title={project.name}>{project.name}</CardTitle>
+                  <CardTitle className="truncate text-lg" title={project.name}>{project.name}</CardTitle>
                   <CardDescription className="text-zinc-400 truncate" title={project.description}>
                     {project.description}
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4 flex-1 flex flex-col">
-                  <div className="text-xs bg-zinc-950 p-2 rounded-md border border-zinc-800 break-all font-mono text-zinc-500">
-                    Bags Mint: {project.bags_token_mint || 'Pending...'}
+                  <div className="text-xs bg-zinc-950 p-2 rounded-lg border border-zinc-800 break-all font-mono text-zinc-500">
+                    Bags Mint: {project.bags_token_mint.startsWith('Mock') ? 'Devnet Mock' : project.bags_token_mint.slice(0, 12) + '...'}
                   </div>
+
+                  {/* Fee Sharing Badge */}
+                  {project.fee_sharing_enabled && (
+                    <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs">
+                      <Shield size={12} />
+                      Fee Share: {project.fee_share_bps / 100}% to creator
+                    </div>
+                  )}
 
                   {/* Fund Tracking Stats */}
                   <div className="grid grid-cols-2 gap-2 pt-2">
-                    <div className="p-3 bg-zinc-950 rounded-md border border-zinc-800">
+                    <div className="p-3 bg-zinc-950 rounded-lg border border-zinc-800">
                       <p className="text-xs text-zinc-500 uppercase tracking-wider mb-1">Bounties</p>
                       <p className="text-lg font-bold text-cyan-400 flex items-center gap-1">
                         <Zap size={14} /> {stats.totalBounties}
                       </p>
                     </div>
-                    <div className="p-3 bg-zinc-950 rounded-md border border-zinc-800">
+                    <div className="p-3 bg-zinc-950 rounded-lg border border-zinc-800">
                       <p className="text-xs text-zinc-500 uppercase tracking-wider mb-1">Raised</p>
                       <p className="text-lg font-bold text-fuchsia-400">{stats.totalFundsRaised.toFixed(1)} SOL</p>
                     </div>
-                    <div className="p-3 bg-zinc-950 rounded-md border border-zinc-800 col-span-2">
+                    <div className="p-3 bg-zinc-950 rounded-lg border border-zinc-800 col-span-2">
                       <p className="text-xs text-zinc-500 uppercase tracking-wider mb-1">Distributed</p>
                       <p className="text-lg font-bold text-emerald-400">{stats.totalFundsDistributed.toFixed(1)} SOL</p>
                     </div>
                   </div>
-                  
+
                   <div className="pt-2 flex flex-col sm:flex-row w-full gap-3 mt-auto">
                     <div className="flex-1">
                       <CreateBountyModal projectId={project.id} projectName={project.name} />

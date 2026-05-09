@@ -19,6 +19,8 @@ export interface ProjectRow {
   description: string;
   bags_token_mint?: string;
   creator_wallet: string;
+  fee_sharing_enabled?: boolean;
+  fee_share_bps?: number;
   created_at: string;
 }
 
@@ -29,6 +31,7 @@ export interface MicroGrantRow {
   description: string;
   reward_amount: number;
   status: 'open' | 'completed';
+  voting_enabled?: boolean;
   created_at: string;
 }
 
@@ -46,6 +49,14 @@ export interface BackingRow {
   backer_wallet: string;
   amount_sol: number;
   tx_signature: string;
+  created_at: string;
+}
+
+export interface VoteRow {
+  $id: string;
+  submission_id: string;
+  grant_id: string;
+  voter_wallet: string;
   created_at: string;
 }
 
@@ -72,6 +83,8 @@ export async function ensureAppwriteSession() {
     await anonymousSessionPromise;
   }
 }
+
+// ──────────────── Projects ────────────────
 
 export async function listProjects() {
   await ensureAppwriteSession();
@@ -109,6 +122,8 @@ export async function createProject(data: Omit<ProjectRow, '$id' | 'created_at'>
   })) as unknown as ProjectRow;
 }
 
+// ──────────────── Bounties / Micro-Grants ────────────────
+
 export async function listBounties() {
   await ensureAppwriteSession();
   const response = (await tables.listRows({
@@ -140,6 +155,7 @@ export async function createBounty(data: Omit<MicroGrantRow, '$id' | 'created_at
     data: {
       ...data,
       status: data.status || 'open',
+      voting_enabled: data.voting_enabled ?? false,
       created_at: data.created_at || new Date().toISOString(),
     },
     permissions: defaultPermissions(),
@@ -155,6 +171,8 @@ export async function completeBounty(bountyId: string) {
     data: { status: 'completed' },
   })) as unknown as MicroGrantRow;
 }
+
+// ──────────────── Submissions ────────────────
 
 export async function listSubmissions() {
   await ensureAppwriteSession();
@@ -186,6 +204,8 @@ export async function createSubmission(data: Omit<SubmissionRow, '$id' | 'create
   })) as unknown as SubmissionRow;
 }
 
+// ──────────────── Backings ────────────────
+
 export async function listBackings() {
   await ensureAppwriteSession();
   const response = (await tables.listRows({
@@ -209,4 +229,58 @@ export async function createBacking(data: Omit<BackingRow, '$id' | 'created_at'>
     },
     permissions: defaultPermissions(),
   })) as unknown as BackingRow;
+}
+
+// ──────────────── Community Voting ────────────────
+
+export async function listVotes() {
+  await ensureAppwriteSession();
+  try {
+    const response = (await tables.listRows({
+      databaseId: APPWRITE_DATABASE_ID,
+      tableId: 'votes',
+      queries: [Query.orderDesc('created_at')],
+    })) as unknown as { rows: VoteRow[] };
+    return response.rows;
+  } catch {
+    // votes table might not exist yet — return empty
+    return [];
+  }
+}
+
+export async function listVotesByGrant(grantId: string) {
+  const allVotes = await listVotes();
+  return allVotes.filter((vote) => vote.grant_id === grantId);
+}
+
+export async function listVotesBySubmission(submissionId: string) {
+  const allVotes = await listVotes();
+  return allVotes.filter((vote) => vote.submission_id === submissionId);
+}
+
+export async function hasVoted(voterWallet: string, grantId: string) {
+  const votes = await listVotesByGrant(grantId);
+  return votes.some((vote) => vote.voter_wallet === voterWallet);
+}
+
+export async function castVote(data: Omit<VoteRow, '$id' | 'created_at'> & { created_at?: string }) {
+  await ensureAppwriteSession();
+
+  // Check if user already voted on this grant
+  const existingVotes = await listVotesByGrant(data.grant_id);
+  const alreadyVoted = existingVotes.some((v) => v.voter_wallet === data.voter_wallet);
+  if (alreadyVoted) {
+    throw new Error('You have already voted on this bounty.');
+  }
+
+  return (await tables.createRow({
+    databaseId: APPWRITE_DATABASE_ID,
+    tableId: 'votes',
+    rowId: ID.unique(),
+    data: {
+      ...data,
+      created_at: data.created_at || new Date().toISOString(),
+    },
+    permissions: defaultPermissions(),
+  })) as unknown as VoteRow;
 }
