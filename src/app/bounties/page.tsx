@@ -7,7 +7,28 @@ import { Loader2, ArrowLeft, Coins, CheckCircle, Clock } from 'lucide-react';
 import Link from 'next/link';
 import { SubmitWorkModal } from '@/components/SubmitWorkModal';
 import { FundBountyModal } from '@/components/FundBountyModal';
-import { listBounties, listProjects, listSubmissions } from '@/lib/appwrite';
+
+interface ProjectRow {
+  $id: string;
+  name: string;
+  creator_wallet: string;
+}
+
+interface BountyRow {
+  $id: string;
+  project_id: string;
+  title: string;
+  description: string;
+  reward_amount: number;
+  status: string;
+  created_at: string;
+}
+
+interface SubmissionRow {
+  $id: string;
+  grant_id: string;
+  submitter_wallet: string;
+}
 
 interface Bounty {
   id: string;
@@ -32,15 +53,19 @@ export default function BountiesPage() {
   useEffect(() => {
     const fetchBounties = async () => {
       try {
-        const [projectRows, bountyRows, submissionRows] = await Promise.all([
-          listProjects(),
-          listBounties(),
-          listSubmissions(),
+        const [projectRes, bountyRes, submissionRes] = await Promise.all([
+          fetch('/api/projects'),
+          fetch('/api/bounties'),
+          fetch('/api/submissions'),
         ]);
 
-        const projectMap = new Map(projectRows.map((project) => [project.$id, project]));
+        const projectRows = (await projectRes.json()).rows || [] as ProjectRow[];
+        const bountyRows = (await bountyRes.json()).rows || [] as BountyRow[];
+        const submissionRows = (await submissionRes.json()).rows || [] as SubmissionRow[];
 
-        const mappedBounties = bountyRows.map((bounty) => {
+        const projectMap = new Map<string, ProjectRow>(projectRows.map((project: ProjectRow) => [project.$id, project]));
+
+        const mappedBounties = bountyRows.map((bounty: BountyRow) => {
           const relatedProject = projectMap.get(bounty.project_id);
           return {
             id: bounty.$id,
@@ -53,8 +78,8 @@ export default function BountiesPage() {
             project_name: relatedProject?.name || 'Unknown Project',
             creator_wallet: relatedProject?.creator_wallet,
             submissions: submissionRows
-              .filter((submission) => submission.grant_id === bounty.$id)
-              .map((submission) => ({ submitter_wallet: submission.submitter_wallet })),
+              .filter((submission: SubmissionRow) => submission.grant_id === bounty.$id)
+              .map((submission: SubmissionRow) => ({ submitter_wallet: submission.submitter_wallet })),
           } as Bounty;
         });
 
