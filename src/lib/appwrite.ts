@@ -4,9 +4,13 @@ export const APPWRITE_ENDPOINT = process.env.NEXT_PUBLIC_APPWRITE_ENDPOINT || ''
 export const APPWRITE_PROJECT_ID = process.env.NEXT_PUBLIC_APPWRITE_PROJECT_ID || '';
 export const APPWRITE_DATABASE_ID = process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID || 'sparkshares';
 
-const client = new Client()
-  .setEndpoint(APPWRITE_ENDPOINT)
-  .setProject(APPWRITE_PROJECT_ID);
+const client = new Client();
+if (APPWRITE_ENDPOINT) {
+  client.setEndpoint(APPWRITE_ENDPOINT);
+}
+if (APPWRITE_PROJECT_ID) {
+  client.setProject(APPWRITE_PROJECT_ID);
+}
 
 const account = new Account(client);
 const tables = new TablesDB(client);
