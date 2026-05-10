@@ -176,11 +176,11 @@ export function LaunchProjectModal() {
           <Rocket className="mr-2" size={18} /> Launch Project
         </Button>
       } />
-      <DialogContent className="sm:max-w-lg md:max-w-2xl bg-zinc-950 border border-zinc-800 rounded-2xl text-zinc-50 shadow-[0_0_60px_rgba(0,0,0,0.8)] p-0 overflow-hidden">
+      <DialogContent className="sm:max-w-lg md:max-w-2xl bg-zinc-950 border border-zinc-800 rounded-2xl text-zinc-50 shadow-[0_0_60px_rgba(0,0,0,0.8)] p-0 overflow-hidden flex flex-col max-h-[90vh]">
         {/* Top gradient bar */}
-        <div className="h-1.5 w-full bg-gradient-to-r from-cyan-400 via-fuchsia-500 to-emerald-400" />
+        <div className="h-1.5 w-full shrink-0 bg-gradient-to-r from-cyan-400 via-fuchsia-500 to-emerald-400" />
 
-        <div className="p-6 md:p-8">
+        <div className="p-6 md:p-8 overflow-y-auto">
           <DialogHeader className="mb-6">
             <DialogTitle className="text-2xl font-black tracking-tight flex items-center gap-3">
               <Rocket className="text-cyan-400" size={24} />
