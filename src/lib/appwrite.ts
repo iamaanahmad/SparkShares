@@ -5,17 +5,28 @@ export const APPWRITE_PROJECT_ID = process.env.NEXT_PUBLIC_APPWRITE_PROJECT_ID |
 export const APPWRITE_DATABASE_ID = process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID || 'sparkshares';
 
 const client = new Client();
-if (APPWRITE_ENDPOINT) {
-  client.setEndpoint(APPWRITE_ENDPOINT);
-}
-if (APPWRITE_PROJECT_ID) {
-  client.setProject(APPWRITE_PROJECT_ID);
-}
-
-const account = new Account(client);
-const tables = new TablesDB(client);
+let account: Account | null = null;
+let tables: TablesDB | null = null;
 
 let anonymousSessionPromise: Promise<void> | null = null;
+
+function ensureAppwriteConfigured() {
+  if (!APPWRITE_ENDPOINT || !APPWRITE_PROJECT_ID) {
+    throw new Error('Missing Appwrite configuration. Set NEXT_PUBLIC_APPWRITE_ENDPOINT and NEXT_PUBLIC_APPWRITE_PROJECT_ID.');
+  }
+}
+
+function getAppwriteServices() {
+  ensureAppwriteConfigured();
+  if (!account || !tables) {
+    client.setEndpoint(APPWRITE_ENDPOINT);
+    client.setProject(APPWRITE_PROJECT_ID);
+    account = new Account(client);
+    tables = new TablesDB(client);
+  }
+
+  return { account, tables };
+}
 
 export interface ProjectRow {
   $id: string;
@@ -74,6 +85,7 @@ function defaultPermissions() {
 }
 
 export async function ensureAppwriteSession() {
+  const { account } = getAppwriteServices();
   try {
     await account.get();
     return;
@@ -92,6 +104,7 @@ export async function ensureAppwriteSession() {
 
 export async function listProjects() {
   await ensureAppwriteSession();
+  const { tables } = getAppwriteServices();
   const response = (await tables.listRows({
     databaseId: APPWRITE_DATABASE_ID,
     tableId: 'projects',
@@ -103,6 +116,7 @@ export async function listProjects() {
 
 export async function listProjectsByCreator(creatorWallet: string) {
   await ensureAppwriteSession();
+  const { tables } = getAppwriteServices();
   const response = (await tables.listRows({
     databaseId: APPWRITE_DATABASE_ID,
     tableId: 'projects',
@@ -114,6 +128,7 @@ export async function listProjectsByCreator(creatorWallet: string) {
 
 export async function createProject(data: Omit<ProjectRow, '$id' | 'created_at'> & { created_at?: string }) {
   await ensureAppwriteSession();
+  const { tables } = getAppwriteServices();
   return (await tables.createRow({
     databaseId: APPWRITE_DATABASE_ID,
     tableId: 'projects',
@@ -130,6 +145,7 @@ export async function createProject(data: Omit<ProjectRow, '$id' | 'created_at'>
 
 export async function listBounties() {
   await ensureAppwriteSession();
+  const { tables } = getAppwriteServices();
   const response = (await tables.listRows({
     databaseId: APPWRITE_DATABASE_ID,
     tableId: 'micro_grants',
@@ -141,6 +157,7 @@ export async function listBounties() {
 
 export async function listBountiesByProject(projectId: string) {
   await ensureAppwriteSession();
+  const { tables } = getAppwriteServices();
   const response = (await tables.listRows({
     databaseId: APPWRITE_DATABASE_ID,
     tableId: 'micro_grants',
@@ -152,6 +169,7 @@ export async function listBountiesByProject(projectId: string) {
 
 export async function createBounty(data: Omit<MicroGrantRow, '$id' | 'created_at' | 'status'> & { status?: MicroGrantRow['status']; created_at?: string }) {
   await ensureAppwriteSession();
+  const { tables } = getAppwriteServices();
   return (await tables.createRow({
     databaseId: APPWRITE_DATABASE_ID,
     tableId: 'micro_grants',
@@ -168,6 +186,7 @@ export async function createBounty(data: Omit<MicroGrantRow, '$id' | 'created_at
 
 export async function completeBounty(bountyId: string) {
   await ensureAppwriteSession();
+  const { tables } = getAppwriteServices();
   return (await tables.updateRow({
     databaseId: APPWRITE_DATABASE_ID,
     tableId: 'micro_grants',
@@ -180,6 +199,7 @@ export async function completeBounty(bountyId: string) {
 
 export async function listSubmissions() {
   await ensureAppwriteSession();
+  const { tables } = getAppwriteServices();
   const response = (await tables.listRows({
     databaseId: APPWRITE_DATABASE_ID,
     tableId: 'submissions',
@@ -196,6 +216,7 @@ export async function listSubmissionsByGrantIds(grantIds: string[]) {
 
 export async function createSubmission(data: Omit<SubmissionRow, '$id' | 'created_at'> & { created_at?: string }) {
   await ensureAppwriteSession();
+  const { tables } = getAppwriteServices();
   return (await tables.createRow({
     databaseId: APPWRITE_DATABASE_ID,
     tableId: 'submissions',
@@ -212,6 +233,7 @@ export async function createSubmission(data: Omit<SubmissionRow, '$id' | 'create
 
 export async function listBackings() {
   await ensureAppwriteSession();
+  const { tables } = getAppwriteServices();
   const response = (await tables.listRows({
     databaseId: APPWRITE_DATABASE_ID,
     tableId: 'backings',
@@ -223,6 +245,7 @@ export async function listBackings() {
 
 export async function createBacking(data: Omit<BackingRow, '$id' | 'created_at'> & { created_at?: string }) {
   await ensureAppwriteSession();
+  const { tables } = getAppwriteServices();
   return (await tables.createRow({
     databaseId: APPWRITE_DATABASE_ID,
     tableId: 'backings',
@@ -240,6 +263,7 @@ export async function createBacking(data: Omit<BackingRow, '$id' | 'created_at'>
 export async function listVotes() {
   await ensureAppwriteSession();
   try {
+    const { tables } = getAppwriteServices();
     const response = (await tables.listRows({
       databaseId: APPWRITE_DATABASE_ID,
       tableId: 'votes',
@@ -269,6 +293,7 @@ export async function hasVoted(voterWallet: string, grantId: string) {
 
 export async function castVote(data: Omit<VoteRow, '$id' | 'created_at'> & { created_at?: string }) {
   await ensureAppwriteSession();
+  const { tables } = getAppwriteServices();
 
   // Check if user already voted on this grant
   const existingVotes = await listVotesByGrant(data.grant_id);
