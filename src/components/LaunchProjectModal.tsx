@@ -57,10 +57,10 @@ export function LaunchProjectModal() {
           description: `Token $${symbol} metadata uploaded to Bags.`,
           duration: 3000,
         });
-      } catch (metaErr: any) {
+      } catch (metaErr: unknown) {
         console.warn('Bags metadata creation failed:', metaErr);
         toast.error('Bags API Error', {
-          description: metaErr?.message || String(metaErr),
+          description: metaErr instanceof Error ? metaErr.message : String(metaErr),
           duration: 5000,
         });
         tokenInfoResponse = null;
